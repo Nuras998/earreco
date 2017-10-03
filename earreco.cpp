@@ -25,11 +25,11 @@ int main( int argc, char** argv ) {
 		if( cv::waitKey(10) == 27 ) break; // stop capturing by pressing ESC 
 	}
 #else // _VIDEO_CAPTURE_
- 		Ear ear("images/ucho.jpg");
+		Ear ear("images/ucho9.jpg");
 		cv::imshow("Ear rocognition", ear.getSelectedEar());
 		if(ear.isReady) {
-			cv::imshow("Extracted ear", ear.getExtractedEar());
-			imwrite("ear.jpg", ear.getExtractedEar());
+		//	cv::imshow("Extracted ear", ear.getExtractedEar());
+		//	imwrite("ear.jpg", ear.getExtractedEar());
 		}
 		else {
 			//cv::destroyWindow("Extracted ear");

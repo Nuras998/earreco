@@ -2,10 +2,7 @@
 #include <vector>
 class Ear {
 
-
-
 public:
-	static cv::CascadeClassifier earClassifier;
 	Ear();
 	Ear(cv::Mat img);
 	Ear(const char* fileName);
@@ -13,15 +10,17 @@ public:
 	cv::Mat getSelectedEar();
 	cv::Mat getExtractedEar();
 	void load(const char* fileName);
-	cv::Rect findEar();
-	void execute();
-	void extractEar(cv::Rect ears); 
 	bool isReady;
 private:
+	cv::Rect findEar();
+	void findReference();
+	void execute();
+	void calcHaarFeature(cv::Mat img);
+	void extractEar(cv::Rect cords);
+
+	static cv::CascadeClassifier earClassifier;
 	cv::Mat originalImg;
 	cv::Mat earSelected;
 	cv::Mat extractedEar;
 	cv::Rect earCords;
-	void findReference();
-	void calcHaarFeature(cv::Mat integralImg);
 }; 

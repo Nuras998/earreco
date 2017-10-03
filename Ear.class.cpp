@@ -61,46 +61,85 @@ void Ear::extractEar(cv::Rect cords) {
 }
 
 void Ear::findReference() {
-	/* TODO
 	cv::Rect refPoint;
-	float scale = 0.2f;
-	refPoint.x = extractedEar.cols - extractedEar.cols * scale;
-	refPoint.y = 0;
-	refPoint.width = refPoint.height = extractedEar.cols * scale;
 	cv::Mat integralImg;
-	cv::Mat patch = extractedEar(refPoint);
-	cv::imshow("patch", patch);
-	cv::integral(patch, integralImg, CV_32S);
-	calcHaarFeature(integralImg);
-	cv::rectangle(extractedEar, refPoint, CV_RGB(0,255,0),2);
-	*/
+	cv::integral(extractedEar, integralImg);
+
+	float scale = 0.2f;
+	int a =  extractedEar.cols * scale;
+	int stepY = a/8;
+	int stepX = a/5;
+
+	a = a%2 == 0 ? a : a+1;
+	stepX = stepX == 0 ? 1 : stepX;
+	stepY = stepY == 0 ? 1 : stepY;
+
+	refPoint.x = extractedEar.cols - a;
+	refPoint.y = 0;
+	refPoint.width = refPoint.height = a;
 	
+	while(refPoint.x >= 0) {
+		while(refPoint.y + refPoint.height < extractedEar.rows) {
+			cv::Mat patch = extractedEar(refPoint);
+			calcHaarFeature(patch);
+			cv::Mat clone = extractedEar.clone();
+			cv::rectangle(clone, refPoint, CV_RGB(0,255,0),2);
+			cv::imshow("ear", clone);
+			cv::imshow("patch", patch);
+			refPoint.y += stepY;
+			clone.release();
+			patch.release();
+			cv::waitKey(0);
+		}
+	refPoint.x -= stepX;
+	refPoint.y = 0;
+	}
+	//cv::Mat patch = cv::imread("images/gradient2.jpg");
+	//calcHaarFeature(patch);
 }
 
-void Ear::calcHaarFeature(cv::Mat integralImg) {
-	/* TODO
-	float haarVertical;
+void Ear::calcHaarFeature(cv::Mat img) {
+	//int haarVertical;
 	float haarHorizontal;
+	long int sum1 = 0;
+	long int sum2 = 0;
+	long int sum = img.cols * img.rows/2 * 255;
+	//std::cout << (int)img.at<uchar>(0,0) << std::endl;
+	//std::cout << img.rows << std::endl;
 
-	int a, b, tmp1, tmp2;
-	
-	if(integralImg.cols%2 == 0) {
-		a = (integralImg.cols/2) - 1;
-		b = (2*a)+1;
-		tmp1 = integralImg.at<int>(a,a) - integralImg.at<int>(0,0) - integralImg.at<int>(a,0)- integralImg.at<int>(0,a);
-		tmp1 -= integralImg.at<int>(b,b) - integralImg.at<int>(a + 1, a + 1) - integralImg.at<int>(b, a + 1)- integralImg.at<int>(a + 1, b);
+	for(int i = 0; i < img.rows/2; i++) {
+		for(int j = 0; j < img.cols; j++) {
+			sum1 += (int)img.at<uchar>(i,j);
+		}
 	}
-	else {
-		a = integralImg.cols/2;
-		b = 2*a;
-		tmp1 = integralImg.at<int>(a,a) - integralImg.at<int>(0,0) - integralImg.at<int>(a,0)- integralImg.at<int>(0,a);
-		tmp1 -= integralImg.at<int>(b,b) - integralImg.at<int>(a + 1, a + 1) - integralImg.at<int>(b, a + 1)- integralImg.at<int>(a + 1, b);
-		std::cout << "nieparzyste" << std::endl;
+	std::cout << "Sum1: " << sum1 << std::endl;
+
+	for(int i = img.rows/2; i < img.rows; i++) {
+		for(int j = 0; j < img.cols; j++) {
+			sum2 += (int)img.at<uchar>(i,j);
+		}
 	}
-	haarVertical = tmp1;
-	std::cout << tmp << std::endl;
-	*/
+	std::cout << "Sum2: " << sum2 << std::endl;
+/*
+	cv::Point A(point.x, point.y);
+	cv::Point B(point.x + point.width, point.y);
+	cv::Point C(point.x, point.y + point.height/2);
+	cv::Point D(point.x + point.width, point.y + point.height);
+
+	sum1 = integralImg.at<int>(D.x, D.y) -  integralImg.at<int>(B.x, B.y) - integralImg.at<int>(C.x, C.y) + integralImg.at<int>(A.x, A.y);
+
+	A.y += point.height/2;
+	B.y += point.height/2;
+	C.y += point.height/2;
+	D.y += point.height/2;
+
+	sum2 = integralImg.at<int>(D.x, D.y) -  integralImg.at<int>(B.x, B.y) - integralImg.at<int>(C.x, C.y) + integralImg.at<int>(A.x, A.y);
+*/
+	haarHorizontal = sum1 - sum2;
+	haarHorizontal /= sum;
+	std::cout << "Horizontal: " << haarHorizontal << std::endl << std::endl;
 }
+
 
 
 
@@ -108,7 +147,6 @@ void Ear::execute() {
 	isReady = false;
 	earCords = findEar();
 	extractEar(earCords);
-	//findReference();	
+//	findReference();
 }
 	
-
