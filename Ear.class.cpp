@@ -61,46 +61,10 @@ void Ear::extractEar(cv::Rect cords) {
 }
 
 void Ear::findReference() {
-	/* TODO
-	cv::Rect refPoint;
-	float scale = 0.2f;
-	refPoint.x = extractedEar.cols - extractedEar.cols * scale;
-	refPoint.y = 0;
-	refPoint.width = refPoint.height = extractedEar.cols * scale;
-	cv::Mat integralImg;
-	cv::Mat patch = extractedEar(refPoint);
-	cv::imshow("patch", patch);
-	cv::integral(patch, integralImg, CV_32S);
-	calcHaarFeature(integralImg);
-	cv::rectangle(extractedEar, refPoint, CV_RGB(0,255,0),2);
-	*/
+//TODO
 	
 }
 
-void Ear::calcHaarFeature(cv::Mat integralImg) {
-	/* TODO
-	float haarVertical;
-	float haarHorizontal;
-
-	int a, b, tmp1, tmp2;
-	
-	if(integralImg.cols%2 == 0) {
-		a = (integralImg.cols/2) - 1;
-		b = (2*a)+1;
-		tmp1 = integralImg.at<int>(a,a) - integralImg.at<int>(0,0) - integralImg.at<int>(a,0)- integralImg.at<int>(0,a);
-		tmp1 -= integralImg.at<int>(b,b) - integralImg.at<int>(a + 1, a + 1) - integralImg.at<int>(b, a + 1)- integralImg.at<int>(a + 1, b);
-	}
-	else {
-		a = integralImg.cols/2;
-		b = 2*a;
-		tmp1 = integralImg.at<int>(a,a) - integralImg.at<int>(0,0) - integralImg.at<int>(a,0)- integralImg.at<int>(0,a);
-		tmp1 -= integralImg.at<int>(b,b) - integralImg.at<int>(a + 1, a + 1) - integralImg.at<int>(b, a + 1)- integralImg.at<int>(a + 1, b);
-		std::cout << "nieparzyste" << std::endl;
-	}
-	haarVertical = tmp1;
-	std::cout << tmp << std::endl;
-	*/
-}
 
 
 
@@ -108,7 +72,6 @@ void Ear::execute() {
 	isReady = false;
 	earCords = findEar();
 	extractEar(earCords);
-	//findReference();	
 }
 	
 

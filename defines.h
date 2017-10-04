@@ -1,1 +1,1 @@
-#define _VIDEO_CAPTURE_
+//#define _VIDEO_CAPTURE_

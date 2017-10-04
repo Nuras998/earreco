@@ -23,5 +23,4 @@ private:
 	cv::Mat extractedEar;
 	cv::Rect earCords;
 	void findReference();
-	void calcHaarFeature(cv::Mat integralImg);
 }; 
