@@ -2,8 +2,6 @@
 #include <vector>
 class Ear {
 
-
-
 public:
 	static cv::CascadeClassifier earClassifier;
 	Ear();
@@ -33,3 +31,4 @@ private:
 	cv::Rect earCords;
 	void findReference();
 }; 
+
