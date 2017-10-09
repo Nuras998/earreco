@@ -26,6 +26,7 @@ int main( int argc, char** argv ) {
 	}
 #else // _VIDEO_CAPTURE_
  		Ear ear("images/ucho.jpg");
+		Ear prep_ear = ear;
 		cv::imshow("Ear rocognition", ear.getSelectedEar());
 		if(ear.isReady) {
 			cv::imshow("Extracted ear", ear.getExtractedEar());
@@ -33,6 +34,11 @@ int main( int argc, char** argv ) {
 		}
 		else {
 			//cv::destroyWindow("Extracted ear");
+		}
+		if(ear.prep_done) {
+			cv::namedWindow("Ear after preprocessing", cv::WINDOW_NORMAL);
+			cv::imshow("Ear after preprocessing", prep_ear.getPreprocessedEar());
+			imwrite("prep_ear.jpg", prep_ear.getPreprocessedEar());
 		}
 		while( cv::waitKey(10) != 27 ) {
 
