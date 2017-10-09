@@ -125,10 +125,15 @@ void Ear::contours(cv::Mat img) {
 	Canny( img, img, 100, 200, 3 );
 	findContours( img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 	cv::Mat drawing = cv::Mat::zeros( img.size(), CV_8UC3 );
+	std::vector<std::vector<cv::Point> >hull( contours.size() );
+	for( int i = 0; i < contours.size(); i++ ) {
+		convexHull( cv::Mat(contours[i]), hull[i], false );
+	}
   	for( int i = 0; i< contours.size(); i++ )
      	{
        		//cv::Scalar color = cv::Scalar( cv::RNG::uniform(0, 255), cv::RNG::uniform(0,255), cv::RNG::uniform(0,255) );
        		drawContours( drawing, contours, i, cv::Scalar(50), 2, 8, hierarchy, 0, cv::Point() );
+		drawContours( drawing, hull, i, cv::Scalar(100), 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
      	}
 
  	cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
