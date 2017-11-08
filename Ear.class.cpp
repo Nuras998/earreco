@@ -47,6 +47,10 @@ cv::Rect Ear::findEar() {
 	cv::Rect cords(0,0,0,0);
 	if(ears.size() == 1) {
 		cords = ears[0];
+		cords.x -= cords.width * 0.17;
+		cords.y -= cords.height * 0.17;
+		cords.width += cords.width * 0.21;
+		cords.height += cords.height * 0.21;
 		cv::rectangle(earSelected, cords, CV_RGB(255,0,0),2);	
 	}
 	return cords;	
