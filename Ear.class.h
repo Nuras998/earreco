@@ -11,6 +11,7 @@ public:
 	cv::Mat getSelectedEar();
 	cv::Mat getExtractedEar();
 	cv::Mat getPreprocessedEar();
+	void segmentation(cv::Mat);
 	void ApplyGaussianBlur(cv::Mat img, int size);
 	void ApplyTreshold(cv::Mat img,int p1, int p2);
 	void ImproveContrast(cv::Mat img, int aplha, int beta);

@@ -1,4 +1,3 @@
-
 #include "Ear.class.h"
 #include <iostream>
 
@@ -79,42 +78,49 @@ void Ear::ApplyTreshold(cv::Mat img, int p1, int p2) {
 void Ear::NormalizeBrightness(cv::Mat img) {
 	int brightness = 0;
 	int px_count = 0;
-	int average_br = 0;
-	int br_factor = 0;
+	double average_br = 0;
+	double br_factor = 0;
+	int value = 0;
 	for(int i=0; i<img.rows; i++) {
 		for(int j=0; j<img.cols; j++) {
-			brightness += (int) img.at<uchar>(j, i);
+			brightness += (int) img.at<uchar>(i, j);
 		//	std::cout << brightness << std::endl;
 			px_count++;
 		}
 	}
-	average_br = brightness / px_count;
+	average_br = (double) brightness / (double)  px_count;
 	//std::cout << "Brightess: " << brightness <<" , px_count: " << px_count << std::endl;
 	br_factor = 154 / average_br;	
 	for(int i=0; i<img.rows; i++) {
 		for(int j=0; j<img.cols; j++) {
-			int value = (int) img.at<uchar>(j,i);
-			value *= br_factor;
+			//std::cout << br_factor << std::endl;
+			value = (int) img.at<uchar>(i,j);
+			value *= 1.4;
 			if(value > 255)
 				value = 255;
 			if(value < 0)
-				value = 255;
-			img.at<uchar>(j,i) = value;
+				value = 0;
+			//std::cout << value << std::endl;
+			img.at<uchar>(i,j) = value;
 		}
 	}
 	
 	std::cout << "Picture's average brightness is " << average_br << std::endl;
-	
 }
-
 void Ear::preprocess() {
 	if(isReady) {
 		preprocessedEar = extractedEar.clone();
+		cv::erode(preprocessedEar,preprocessedEar,cv::Mat(),cv::Point(-1,-1),15);
 		NormalizeBrightness(preprocessedEar);
-		ApplyGaussianBlur(preprocessedEar, 25);
-		ImproveContrast(preprocessedEar, 2,-100);
-		ApplyTreshold(preprocessedEar, 200,255);
-		contours(preprocessedEar);
+		//segmentation(preprocessedEar);
+		//ImproveContrast(preprocessedEar, 2,-100);
+		for(int i=0; i<7;i++) {
+			ApplyGaussianBlur(preprocessedEar, 25);
+		}
+		ApplyTreshold(preprocessedEar, 220,255);
+		//contours(preprocessedEar);
+		imwrite("../Obrazy/Badaniepreprocessingu/progowanie/z.jpg", preprocessedEar);
+		//imwrite("../Obrazy/Badaniepreprocessingu/erozja/bez.jpg", extractedEar);
 		prep_done = true;
 	}
 }
@@ -131,15 +137,29 @@ void Ear::contours(cv::Mat img) {
 	}
   	for( int i = 0; i< contours.size(); i++ )
      	{
-       		//cv::Scalar color = cv::Scalar( cv::RNG::uniform(0, 255), cv::RNG::uniform(0,255), cv::RNG::uniform(0,255) );
        		drawContours( drawing, contours, i, cv::Scalar(50), 2, 8, hierarchy, 0, cv::Point() );
-		drawContours( drawing, hull, i, cv::Scalar(100), 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
+		drawContours( drawing, hull, i, cv::Scalar(255), 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
      	}
 
  	cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
   	imshow( "Contours", drawing );
+	drawing.copyTo(preprocessedEar);
+	//imwrite("../Obrazy/Badaniepreprocessingu/erozja/z.jpg", img);
 }
 
+void Ear::segmentation(cv::Mat img)
+{
+	//cv::erode(img,img,cv::Mat(),cv::Point(-1,-1),30);
+	//cv::namedWindow("Eroded Image");
+	//cv::imshow("Eroded Image",img);
+	//cv::dilate(img,img,cv::MpreprocessedEar),cv::Point(-1,-1),30);
+	//cv::namedWindow("Dilated Image");
+	//cv::imshow("Dilated Image",img);
+
+	// Eliminate noise and smaller objects
+	//cv::Mat fg;
+	//cv::erode(binary,fg,cv::Mat(),cv::Point(-1,-1),6);
+}
 void Ear::findReference() {
 //TODO
 	
