@@ -13,9 +13,14 @@ public:
 	cv::Mat getPreprocessedEar();
 	void segmentation(cv::Mat);
 	void ApplyGaussianBlur(cv::Mat img, int size);
-	void ApplyTreshold(cv::Mat img,int p1, int p2);
+	void ApplyThreshold(cv::Mat img,int p1, int p2);
 	void ImproveContrast(cv::Mat img, int aplha, int beta);
-	void NormalizeBrightness(cv::Mat img);
+	void NormalizeBrightnessMean(cv::Mat img);
+	void NormalizeBrightnessMedian(cv::Mat img);
+	void NormalizeBrightnessAddConst(cv::Mat img);
+	double calcThresholdMean(cv::Mat img);
+	double calcThresholdMedian(cv::Mat img);
+	int calcMedian(cv::Mat img);
 	void contours(cv::Mat img);
 	void load(const char* fileName);
 	cv::Rect findEar();

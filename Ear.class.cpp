@@ -50,9 +50,9 @@ cv::Rect Ear::findEar() {
 	cv::Rect cords(0,0,0,0);
 	if(ears.size() == 1) {
 		cords = ears[0];
-		cords.x -= cords.width * 0.17;
+		cords.x -= cords.width * 0.25;
 		cords.y -= cords.height * 0.17;
-		cords.width += cords.width * 0.21;
+		cords.width += cords.width * 0.25;
 		cords.height += cords.height * 0.21;
 		cv::rectangle(earSelected, cords, CV_RGB(255,0,0),2);	
 	}
@@ -75,11 +75,11 @@ void Ear::ApplyGaussianBlur(cv::Mat img, int size) {
 	GaussianBlur( img, img, cv::Size( size, size ), 0, 0 );
 }
 
-void Ear::ApplyTreshold(cv::Mat img, int p1, int p2) {
+void Ear::ApplyThreshold(cv::Mat img, int p1, int p2) {
 	threshold( img, img, p1, p2,CV_THRESH_BINARY );
 }
 
-void Ear::NormalizeBrightness(cv::Mat img) {
+void Ear::NormalizeBrightnessMean(cv::Mat img) {
 	int brightness = 0;
 	int px_count = 0;
 	double average_br = 0;
@@ -99,7 +99,7 @@ void Ear::NormalizeBrightness(cv::Mat img) {
 		for(int j=0; j<img.cols; j++) {
 			//std::cout << br_factor << std::endl;
 			value = (int) img.at<uchar>(i,j);
-			value *= 1.4;
+			value *= br_factor; //WERSJA Z MNOŻENIEM RAZY WSPÓŁCZYNNIK
 			if(value > 255)
 				value = 255;
 			if(value < 0)
@@ -111,20 +111,103 @@ void Ear::NormalizeBrightness(cv::Mat img) {
 	
 	std::cout << "Picture's average brightness is " << average_br << std::endl;
 }
+
+void Ear::NormalizeBrightnessMedian(cv::Mat img) {
+	int value = 0;
+	double median = calcMedian(img);
+	std::cout << "Picture's median is: " << median << std::endl;
+	double br_factor = 178 / median;
+	for(int i=0; i<img.rows; i++) {
+		for(int j=0; j<img.cols; j++) {
+			value = (int) img.at<uchar>(i,j);
+			value *= br_factor;
+			if(value > 255)
+				value = 255;
+			if(value < 0)
+				value = 0;
+			img.at<uchar>(i,j) = value;
+		}
+	}
+}
+
+void Ear::NormalizeBrightnessAddConst(cv::Mat img) {
+	int value = 0;
+	for(int i=0; i<img.rows; i++) {
+		for(int j=0; j<img.cols; j++) {
+			value = (int) img.at<uchar>(i,j);
+			value += 50;
+			if(value > 255)
+				value = 255;
+			if(value < 0)
+				value = 0;
+			img.at<uchar>(i,j) = value;
+		}
+	}
+}
+
+
+
+
+double Ear::calcThresholdMean(cv::Mat img) {
+	int brightness = 0;
+        int px_count = 0;
+        double average_br = 0;
+        double br_factor = 0;
+        int value = 0;
+        threshold(img,img,average_br,255,CV_THRESH_TOZERO);
+	for(int i=0; i<img.rows; i++) {
+                for(int j=0; j<img.cols; j++) {
+                        brightness += (int) img.at<uchar>(i, j);
+                //      std::cout << brightness << std::endl;
+                        px_count++;
+                }
+        }
+        average_br = (double) brightness / (double)  px_count;
+	return (0.9*average_br + (255-0.9*average_br)/2);
+}
+
+double Ear::calcThresholdMedian(cv::Mat img) {
+	int median = calcMedian(img);
+	return 0.6 * median;
+}
+
+int Ear::calcMedian(cv::Mat img) {
+	std::vector<int> pixels;
+	int median = 0;
+	for(int i=0; i<img.rows; i++) {
+                for(int j=0; j<img.cols; j++) {
+                        pixels.push_back( (int) img.at<uchar>(i, j));
+                }
+        }
+	std::sort(pixels.begin(), pixels.end(), std::greater<int>() ); //sortowanie od najmniejszego do największego
+	//for(int i=0; i<pixels.size(); i++)
+		//std::cout << pixels.at(i) << std::endl;
+	if( pixels.size() % 2 != 0 ) //jeżeli liczba pikseli nieparzysta
+		median = pixels.at( (pixels.size()+1)/2);
+	else if(pixels.size() % 2 == 0) //l pikseli parzysta
+		median = ( (int) floor( pixels.at( (pixels.size()+1)/2) ) + (int) ceil( pixels.at( (pixels.size()+1)/2) ) /2 );
+	return median;
+}
 void Ear::preprocess() {
 	if(isReady) {
 		preprocessedEar = extractedEar.clone();
-		cv::erode(preprocessedEar,preprocessedEar,cv::Mat(),cv::Point(-1,-1),15);
-		NormalizeBrightness(preprocessedEar);
+		//cv::erode(preprocessedEar,preprocessedEar,cv::Mat(),cv::Point(-1,-1),5);
+		NormalizeBrightnessAddConst(preprocessedEar);
 		//segmentation(preprocessedEar);
 		//ImproveContrast(preprocessedEar, 2,-100);
-		for(int i=0; i<7;i++) {
-			ApplyGaussianBlur(preprocessedEar, 25);
-		}
-		ApplyTreshold(preprocessedEar, 220,255);
-		//contours(preprocessedEar);
-		imwrite("../Obrazy/Badaniepreprocessingu/progowanie/z.jpg", preprocessedEar);
-		//imwrite("../Obrazy/Badaniepreprocessingu/erozja/bez.jpg", extractedEar);
+		ApplyGaussianBlur(preprocessedEar, 25);
+		//ApplyGaussianBlur(preprocessedEar, 25);
+		//double treshold = calcThresholdMean(preprocessedEar);
+		double treshold = calcThresholdMedian(preprocessedEar);
+		//NormalizeBrightnessAddConst(preprocessedEar);
+		cv::namedWindow( "Before binarization", CV_WINDOW_AUTOSIZE );
+		imshow( "Before binarization", preprocessedEar );
+		ApplyThreshold(preprocessedEar, treshold,255);
+		cv::namedWindow("After thresholding", CV_WINDOW_AUTOSIZE);
+		imshow("After thresholding", preprocessedEar);
+		Canny( preprocessedEar, preprocessedEar, 100, 200, 3 );
+		contours(preprocessedEar);
+		imwrite("../Obrazy/Badaniepreprocessingu/mediana/13.jpg", preprocessedEar);
 		prep_done = true;
 	}
 }
