@@ -121,6 +121,7 @@ void Ear::NormalizeBrightnessMedian(cv::Mat img) {
 		for(int j=0; j<img.cols; j++) {
 			value = (int) img.at<uchar>(i,j);
 			value *= br_factor;
+			//value += 20;
 			if(value > 255)
 				value = 255;
 			if(value < 0)
@@ -135,7 +136,7 @@ void Ear::NormalizeBrightnessAddConst(cv::Mat img) {
 	for(int i=0; i<img.rows; i++) {
 		for(int j=0; j<img.cols; j++) {
 			value = (int) img.at<uchar>(i,j);
-			value += 50;
+			value += 10;
 			if(value > 255)
 				value = 255;
 			if(value < 0)
@@ -163,12 +164,13 @@ double Ear::calcThresholdMean(cv::Mat img) {
                 }
         }
         average_br = (double) brightness / (double)  px_count;
-	return (0.9*average_br + (255-0.9*average_br)/2);
+	//return (0.9*average_br + (255-0.9*average_br)/2);
+	return  average_br;
 }
 
 double Ear::calcThresholdMedian(cv::Mat img) {
 	int median = calcMedian(img);
-	return 0.6 * median;
+	return 0.9 * median;
 }
 
 int Ear::calcMedian(cv::Mat img) {
@@ -185,7 +187,7 @@ int Ear::calcMedian(cv::Mat img) {
 	if( pixels.size() % 2 != 0 ) //jeżeli liczba pikseli nieparzysta
 		median = pixels.at( (pixels.size()+1)/2);
 	else if(pixels.size() % 2 == 0) //l pikseli parzysta
-		median = ( (int) floor( pixels.at( (pixels.size()+1)/2) ) + (int) ceil( pixels.at( (pixels.size()+1)/2) ) /2 );
+		median =( ( (int) floor( pixels.at( (pixels.size()+1)/2) ) + (int) ceil( pixels.at( (pixels.size()+1)/2) ) ) / 2);
 	return median;
 }
 void Ear::preprocess() {
@@ -198,16 +200,17 @@ void Ear::preprocess() {
 		ApplyGaussianBlur(preprocessedEar, 25);
 		//ApplyGaussianBlur(preprocessedEar, 25);
 		//double treshold = calcThresholdMean(preprocessedEar);
-		double treshold = calcThresholdMedian(preprocessedEar);
+		double treshold = calcThresholdMean(preprocessedEar);
 		//NormalizeBrightnessAddConst(preprocessedEar);
 		cv::namedWindow( "Before binarization", CV_WINDOW_AUTOSIZE );
 		imshow( "Before binarization", preprocessedEar );
 		ApplyThreshold(preprocessedEar, treshold,255);
 		cv::namedWindow("After thresholding", CV_WINDOW_AUTOSIZE);
 		imshow("After thresholding", preprocessedEar);
+		//dilate(preprocessedEar, preprocessedEar, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
 		Canny( preprocessedEar, preprocessedEar, 100, 200, 3 );
 		contours(preprocessedEar);
-		imwrite("../Obrazy/Badaniepreprocessingu/mediana/13.jpg", preprocessedEar);
+		imwrite("../Obrazy/Badaniepreprocessingu/!/najpierwOblThr/thrMediana/stWart50/10/nowe/32.jpg", preprocessedEar);
 		prep_done = true;
 	}
 }
@@ -215,7 +218,7 @@ void Ear::preprocess() {
 void Ear::contours(cv::Mat img) {
 	std::vector<std::vector<cv::Point> > contours;
   	std::vector<cv::Vec4i> hierarchy;
-	Canny( img, img, 100, 200, 3 );
+	//Canny( img, img, 100, 200, 3 );
 	findContours( img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 	cv::Mat drawing = cv::Mat::zeros( img.size(), CV_8UC3 );
 	std::vector<std::vector<cv::Point> >hull( contours.size() );

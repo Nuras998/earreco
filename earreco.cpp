@@ -25,7 +25,7 @@ int main( int argc, char** argv ) {
 		if( cv::waitKey(10) == 27 ) break; // stop capturing by pressing ESC 
 	}
 #else // _VIDEO_CAPTURE_
-		Ear ear("images/ucho10.jpg");
+		Ear ear("images/ucho32.jpg");
 		Ear prep_ear = ear;
 		cv::imshow("Ear rocognition", ear.getSelectedEar());
 		if(ear.isReady) {
