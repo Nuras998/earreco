@@ -57,7 +57,7 @@ cv::Rect Ear::findEar() {
 }
 void Ear::houghLines(cv::Mat img) {
 	std::vector<cv::Vec2f> lines;
-	HoughLines(extractedEar, lines, 1, CV_PI/180, 100, 0, 0 );
+	HoughLines(extractedEar, lines, 1, CV_PI/180, 250, 0, 0 );
 
 	for( size_t i = 0; i < lines.size(); i++ ) {
 		float rho = lines[i][0];
@@ -74,24 +74,29 @@ void Ear::houghLines(cv::Mat img) {
 		line( extractedEar, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
 	}
 
-/*
-	std::vector<cv::Vec4i> lines;
-	HoughLinesP(extractedEar, lines, 1, CV_PI/180, 50, 50, 10 );
+
+	/*std::vector<cv::Vec4i> lines;
+	HoughLinesP(extractedEar, lines, 1, CV_PI/180, 255, 50, 150 );
 	for( size_t i = 0; i < lines.size(); i++ )
 	{
 		cv::Vec4i l = lines[i];
 		line( extractedEar, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 3, CV_AA);
-	}
-*/}
+	}*/
+}
 void Ear::contours(cv::Mat img) {
-	cv::Mat canny_output;
 	std::vector<std::vector<cv::Point> > contours;
 	std::vector<cv::Vec4i> hierarchy;
-	findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
-	cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
+	findContours( img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+
+	std::vector<std::vector<cv::Point> >hull( contours.size() );
+	for( int i = 0; i < contours.size(); i++ )
+	{  convexHull( cv::Mat(contours[i]), hull[i], false ); }
+
+	cv::Mat drawing = cv::Mat::zeros( img.size(), CV_8UC3 );
 	for( int i = 0; i< contours.size(); i++ ) {
 		cv::Scalar color = cv::Scalar( 50,50,50 );
 		drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
+		drawContours( drawing, hull, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
 	}
 	cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
 	imshow( "Contours", drawing );
