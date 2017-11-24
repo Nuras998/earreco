@@ -17,6 +17,8 @@ private:
         void execute();
         void calcHaarFeature(cv::Mat img);
         void extractEar(cv::Rect cords);
+	void houghLines(cv::Mat img);
+	void contours(cv::Mat img);
 
         static cv::CascadeClassifier earClassifier;
         cv::Mat originalImg;
