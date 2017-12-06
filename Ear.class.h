@@ -17,8 +17,10 @@ private:
         void execute();
         void calcHaarFeature(cv::Mat img);
         void extractEar(cv::Rect cords);
+	void improveContrast(cv::Mat img);
 	void houghLines(cv::Mat img);
-	void contours(cv::Mat img);
+	static bool less_vectors(const std::vector<cv::Point_<int> >& a, const std::vector<cv::Point_<int> >& b);
+	void contours(cv::Mat img, cv::Mat src);
 
         static cv::CascadeClassifier earClassifier;
         cv::Mat originalImg;
