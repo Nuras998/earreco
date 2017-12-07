@@ -9,6 +9,7 @@ public:
         cv::Mat getOriginal();
         cv::Mat getSelectedEar();
         cv::Mat getExtractedEar();
+	cv::Mat cont;
         void load(const char* fileName);
         bool isReady;
 private:

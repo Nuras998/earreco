@@ -76,8 +76,8 @@ void Ear::contours(cv::Mat img, cv::Mat src) {
 		//drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
 		drawContours( drawing, hull, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
 	}
-	cv::namedWindow("allContours", CV_WINDOW_AUTOSIZE);
-	imshow("allContours", drawing);
+	//cv::namedWindow("allContours", CV_WINDOW_AUTOSIZE);
+	//imshow("allContours", drawing);
 
 
 	std::sort(contours.begin(),contours.end(), less_vectors);
@@ -90,9 +90,10 @@ void Ear::contours(cv::Mat img, cv::Mat src) {
         convexHull( cv::Mat(vecContours[0]), hullSingle[0], false );
 
 	drawContours( src, hullSingle, 0, myColor, 2, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
-	cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-	imshow( "Contours", src );
-	imwrite("Contours.jpg", src);
+	//cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+	//imshow( "Contours", src );
+	//imwrite("Contours.jpg", src);
+	cont= src.clone();
 }
 
 void Ear::improveContrast(cv::Mat img) {
@@ -108,8 +109,8 @@ void Ear::improveContrast(cv::Mat img) {
 			img.at<uchar>(y,x) = cv::saturate_cast<uchar>( alpha*( img.at<uchar>(y,x)-90 ) );
 		}
 	}
-	cv::namedWindow( "Contrast", CV_WINDOW_AUTOSIZE );
-        imshow( "Contrast", img );
+	//cv::namedWindow( "Contrast", CV_WINDOW_AUTOSIZE );
+        //imshow( "Contrast", img );
 }
 void Ear::extractEar(cv::Rect cords) {
 	if(cords.x && cords.y) {
@@ -128,10 +129,10 @@ void Ear::extractEar(cv::Rect cords) {
 	erode(extractedEar,extractedEar,erodeElement);
 	medianBlur(extractedEar, extractedEar, 15);
 	dilate(extractedEar,extractedEar,dilateElement);
-	cv::namedWindow( "Erode dilate", CV_WINDOW_AUTOSIZE );
-        imshow( "Erode dilate", extractedEar );
+	//cv::namedWindow( "Erode dilate", CV_WINDOW_AUTOSIZE );
+        //imshow( "Erode dilate", extractedEar );
 	improveContrast(extractedEar);
-	imwrite("tylkodylatacjaerozja.jpg",extractedEar);
+	//imwrite("tylkodylatacjaerozja.jpg",extractedEar);
 	int kernel_size = 7;
 	int scale = 1;
 	int delta = 0;
