@@ -55,36 +55,7 @@ cv::Rect Ear::findEar() {
 	}
 	return cords;	
 }
-void Ear::houghLines(cv::Mat img) {
-	std::vector<cv::Vec2f> lines;
-	HoughLines(extractedEar, lines, 1, CV_PI/180, 250, 0, 0 );
-
-	for( size_t i = 0; i < lines.size(); i++ ) {
-		float rho = lines[i][0];
-		float theta = lines[i][1];
-		cv::Point pt1, pt2;
-		double a = cos(theta);
-		double b = sin(theta);
-		double x0 = a*rho;
-		double y0 = b*rho;
-		pt1.x = cvRound(x0 + 1000*(-b));
-		pt1.y = cvRound(y0 + 1000*(a));
-		pt2.x = cvRound(x0 - 1000*(-b));
-		pt2.y = cvRound(y0 - 1000*(a));
-		line( extractedEar, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
-	}
-
-
-	/*std::vector<cv::Vec4i> lines;
-	HoughLinesP(extractedEar, lines, 1, CV_PI/180, 255, 50, 150 );
-	for( size_t i = 0; i < lines.size(); i++ )
-	{
-		cv::Vec4i l = lines[i];
-		line( extractedEar, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 3, CV_AA);
-	}*/
-}
 bool Ear::less_vectors(const std::vector<cv::Point_<int> >& a,const std::vector<cv::Point_<int> >& b) {
-	//return a.size() < b.size();
 	double first = cv::contourArea(a, false );
 	double second =  cv::contourArea(b, false);
 	return (first < second) && a.size() < b.size();
@@ -115,12 +86,9 @@ void Ear::contours(cv::Mat img, cv::Mat src) {
 	vecContours.push_back(singleContour);
 	cv::Mat picSingleContour = cv::Mat::zeros(img.size(), CV_8UC3);
 	cv::Vec3b myColor(255,0,0);
-	//for(int i=0;i<singleContour.size();i++)
-	//	picSingleContour.at<cv::Vec3b>(singleContour[i].x,singleContour[i].y)=myColour;
 	std::vector<std::vector<cv::Point> >hullSingle(vecContours.size() );
         convexHull( cv::Mat(vecContours[0]), hullSingle[0], false );
 
-                //drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
 	drawContours( src, hullSingle, 0, myColor, 2, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
 	cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
 	imshow( "Contours", src );
@@ -148,10 +116,6 @@ void Ear::extractEar(cv::Rect cords) {
 	extractedEar = originalImg(cords);
 	cv::cvtColor(extractedEar, extractedEar, CV_RGB2GRAY);
 	cv::Mat src = extractedEar.clone();
-	//!GaussianBlur( extractedEar, extractedEar, cv::Size( 11,11 ), 0, 0 );
-	//GaussianBlur( extractedEar, extractedEar, cv::Size( 25,25 ), 0, 0 );
-	//GaussianBlur( extractedEar, extractedEar, cv::Size( 25,25 ), 0, 0 );
-	//medianBlur(extractedEar, extractedEar, 25);
 	int erosion_size =7;
 	cv::Mat erodeElement = getStructuringElement(cv::MORPH_ELLIPSE,
               cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
@@ -162,37 +126,20 @@ void Ear::extractEar(cv::Rect cords) {
               cv::Point(dilatation_size, dilatation_size) );
 
 	erode(extractedEar,extractedEar,erodeElement);
-	//erode(extractedEar,extractedEar,erodeElement);
-	//erode(extractedEar,extractedEar,erodeElement);
-	//erode(extractedEar,extractedEar,erodeElement);
-	//erode(extractedEar,extractedEar,erodeElement);
 	medianBlur(extractedEar, extractedEar, 15);
 	dilate(extractedEar,extractedEar,dilateElement);
-	//cv::addWeighted(extractedEar,0.5, extractedEar, 0.5, 10, extractedEar);
 	cv::namedWindow( "Erode dilate", CV_WINDOW_AUTOSIZE );
         imshow( "Erode dilate", extractedEar );
-	//dilate(extractedEar,extractedEar,erodeElement);
-	//dilate(extractedEar,extractedEar,erodeElement);
 	improveContrast(extractedEar);
 	imwrite("tylkodylatacjaerozja.jpg",extractedEar);
-	//Canny(extractedEar, extractedEar, 10, 40, 7);
-	//houghLines(extractedEar);
 	int kernel_size = 7;
 	int scale = 1;
 	int delta = 0;
-	//int ddepth = CV_16S;
 	int ddepth = CV_8U;
 	Laplacian( extractedEar, extractedEar, ddepth, kernel_size, scale, delta, cv::BORDER_DEFAULT );
-	//convertScaleAbs( extractedEar, extractedEar );
-	//erode(extractedEar, extractedEar,erodeElement);  // dilate(image,dst,element);
-	//dilate(extractedEar, extractedEar, erodeElement);
 	fastNlMeansDenoising(extractedEar, extractedEar, 9, 9,21 );
 
-	//dilate(extractedEar, extractedEar, erodeElement);
-	//medianBlur(extractedEar, extractedEar, 3);
-	//erode(extractedEar, extractedEar, erodeElement);
-	//dilate(extractedEar, extractedEar, element);
-	//Canny(extractedEar, extractedEar, 150, 250, 3);
+	medianBlur(extractedEar, extractedEar, 3);
 	contours(extractedEar,src);
 	isReady = true;
 	}
