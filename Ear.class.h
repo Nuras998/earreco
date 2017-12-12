@@ -18,6 +18,11 @@ private:
         void execute();
         void calcHaarFeature(cv::Mat img);
         void extractEar(cv::Rect cords);
+	void preprocess(cv::Mat img);
+	void preprocess2(cv::Mat img);
+	void NormalizeBrightnessAddConst(cv::Mat img);
+	double calcThresholdMedian(cv::Mat img);
+	int calcMedian(cv::Mat img);
 	void improveContrast(cv::Mat img);
 	void houghLines(cv::Mat img);
 	static bool less_vectors(const std::vector<cv::Point_<int> >& a, const std::vector<cv::Point_<int> >& b);

@@ -76,8 +76,8 @@ void Ear::contours(cv::Mat img, cv::Mat src) {
 		//drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
 		drawContours( drawing, hull, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
 	}
-	//cv::namedWindow("allContours", CV_WINDOW_AUTOSIZE);
-	//imshow("allContours", drawing);
+	cv::namedWindow("allContours", CV_WINDOW_AUTOSIZE);
+	imshow("allContours", drawing);
 
 
 	std::sort(contours.begin(),contours.end(), less_vectors);
@@ -90,10 +90,9 @@ void Ear::contours(cv::Mat img, cv::Mat src) {
         convexHull( cv::Mat(vecContours[0]), hullSingle[0], false );
 
 	drawContours( src, hullSingle, 0, myColor, 2, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
-	//cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-	//imshow( "Contours", src );
-	//imwrite("Contours.jpg", src);
-	cont= src.clone();
+	cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+	imshow( "Contours", src );
+	imwrite("Contours.jpg", src);
 }
 
 void Ear::improveContrast(cv::Mat img) {
@@ -109,14 +108,62 @@ void Ear::improveContrast(cv::Mat img) {
 			img.at<uchar>(y,x) = cv::saturate_cast<uchar>( alpha*( img.at<uchar>(y,x)-90 ) );
 		}
 	}
-	//cv::namedWindow( "Contrast", CV_WINDOW_AUTOSIZE );
-        //imshow( "Contrast", img );
+	cv::namedWindow( "Contrast", CV_WINDOW_AUTOSIZE );
+        imshow( "Contrast", img );
 }
-void Ear::extractEar(cv::Rect cords) {
-	if(cords.x && cords.y) {
-	extractedEar = originalImg(cords);
-	cv::cvtColor(extractedEar, extractedEar, CV_RGB2GRAY);
-	cv::Mat src = extractedEar.clone();
+void Ear::NormalizeBrightnessAddConst(cv::Mat img) {
+	int value = 0;
+	for(int i=0; i<img.rows; i++) {
+		for(int j=0; j<img.cols; j++) {
+			value = (int) img.at<uchar>(i,j);
+			value += 10;
+			if(value > 255)
+				value = 255;
+			if(value < 0)
+				value = 0;
+			img.at<uchar>(i,j) = value;
+		}
+	}
+}
+double Ear::calcThresholdMedian(cv::Mat img) {
+	int median = calcMedian(img);
+	return 0.9 * median;
+}
+
+int Ear::calcMedian(cv::Mat img) {
+	std::vector<int> pixels;
+	int median = 0;
+	for(int i=0; i<img.rows; i++) {
+                for(int j=0; j<img.cols; j++) {
+                        pixels.push_back( (int) img.at<uchar>(i, j));
+                }
+        }
+	std::sort(pixels.begin(), pixels.end(), std::greater<int>() ); //sortowanie od najmniejszego do największego
+	//for(int i=0; i<pixels.size(); i++)
+		//std::cout << pixels.at(i) << std::endl;
+	if( pixels.size() % 2 != 0 ) //jeżeli liczba pikseli nieparzysta
+		median = pixels.at( (pixels.size()+1)/2);
+	else if(pixels.size() % 2 == 0) //l pikseli parzysta
+		median =( ( (int) floor( pixels.at( (pixels.size()+1)/2) ) + (int) ceil( pixels.at( (pixels.size()+1)/2) ) ) / 2);
+	return median;
+}
+void Ear::preprocess(cv::Mat img) {
+	cv::cvtColor(img,img, CV_RGB2GRAY);
+	cv::Mat src = img.clone();
+	NormalizeBrightnessAddConst(img);
+	GaussianBlur( img, img, cv::Size(25,25), 0, 0 );
+	double thresh = calcThresholdMedian(img);
+	cv::namedWindow( "Before binarization", CV_WINDOW_AUTOSIZE );
+	imshow( "Before binarization",img);
+	threshold( img, img, thresh, 255,CV_THRESH_BINARY );
+	cv::namedWindow("After thresholding", CV_WINDOW_AUTOSIZE);
+	imshow("After thresholding", img);
+	Canny( img,img, 100, 200, 3 );
+	contours(img,src);
+}
+void Ear::preprocess2(cv::Mat img) {
+	cv::cvtColor(img,img, CV_RGB2GRAY);
+	cv::Mat src = img.clone();
 	int erosion_size =7;
 	cv::Mat erodeElement = getStructuringElement(cv::MORPH_ELLIPSE,
               cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
@@ -126,22 +173,27 @@ void Ear::extractEar(cv::Rect cords) {
               cv::Size(2 * dilatation_size + 1, 2 * dilatation_size + 1),
               cv::Point(dilatation_size, dilatation_size) );
 
-	erode(extractedEar,extractedEar,erodeElement);
-	medianBlur(extractedEar, extractedEar, 15);
-	dilate(extractedEar,extractedEar,dilateElement);
-	//cv::namedWindow( "Erode dilate", CV_WINDOW_AUTOSIZE );
-        //imshow( "Erode dilate", extractedEar );
-	improveContrast(extractedEar);
-	//imwrite("tylkodylatacjaerozja.jpg",extractedEar);
+	erode(img,img,erodeElement);
+	medianBlur(img,img, 15);
+	dilate(img,img,dilateElement);
+	cv::namedWindow( "Erode dilate", CV_WINDOW_AUTOSIZE );
+        imshow( "Erode dilate", img );
+	improveContrast(img);
+	imwrite("tylkodylatacjaerozja.jpg",img);
 	int kernel_size = 7;
 	int scale = 1;
 	int delta = 0;
 	int ddepth = CV_8U;
-	Laplacian( extractedEar, extractedEar, ddepth, kernel_size, scale, delta, cv::BORDER_DEFAULT );
-	fastNlMeansDenoising(extractedEar, extractedEar, 9, 9,21 );
+	Laplacian( img,img, ddepth, kernel_size, scale, delta, cv::BORDER_DEFAULT );
+	fastNlMeansDenoising(img,img, 9, 9,21 );
 
-	medianBlur(extractedEar, extractedEar, 3);
-	contours(extractedEar,src);
+	medianBlur(img,img, 3);
+	contours(img,src);
+}
+void Ear::extractEar(cv::Rect cords) {
+	if(cords.x && cords.y) {
+	extractedEar = originalImg(cords);
+	preprocess(extractedEar);
 	isReady = true;
 	}
 }
