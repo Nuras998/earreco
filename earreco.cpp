@@ -7,8 +7,8 @@
 using namespace std;
 int main( int argc, char** argv ) {
 #ifdef _VIDEO_CAPTURE_
-	cv::VideoCapture cap;   
- 	if(!cap.open(0)) {
+	cv::VideoCapture cap;
+	if(!cap.open(1)) {
 		return 0;
 	}
 	for(;;) {
@@ -16,10 +16,10 @@ int main( int argc, char** argv ) {
 		cap >> frame;
 		if( frame.empty() ) break; // end of video stream
  		Ear ear(frame);
-		//cv::imshow("Ear rocognition", ear.getSelectedEar());
+		cv::imshow("Ear rocognition", ear.getSelectedEar());
 		if(ear.isReady) {
-			//cv::namedWindow("Extracted ear",  cv::WINDOW_NORMAL);
-			c//v::imshow("Extracted ear", ear.getExtractedEar());
+			cv::namedWindow("Extracted ear",  cv::WINDOW_NORMAL);
+			cv::imshow("Extracted ear", ear.getExtractedEar());
 			imwrite("ear.jpg", ear.getExtractedEar());
 		}
 		else {
@@ -35,12 +35,15 @@ int main( int argc, char** argv ) {
 		for(int i = 0; i < files.size(); i++) {
 			ears.push_back(Ear(files[i].data()));
 		}
+		for(int i = 0; i < files.size(); i++) {
+			cout << files[i].data() << endl;
+		}
 
 		for(int i = 0; i < ears.size(); i++) {
 			if(ears[i].isReady) {
 				std::ostringstream stm ;
 				stm << i ;
-				cv::imwrite("ears/ear" + stm.str() + ".jpg" , ears[i].cont);
+				cv::imwrite("ears/ear" + stm.str() + ".jpg" , ears[i].getExtractedEar());
 			}
 		}
 #endif
