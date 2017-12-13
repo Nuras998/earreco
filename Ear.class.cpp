@@ -76,8 +76,8 @@ void Ear::contours(cv::Mat img, cv::Mat src) {
 		//drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
 		drawContours( drawing, hull, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
 	}
-	cv::namedWindow("allContours", CV_WINDOW_AUTOSIZE);
-	imshow("allContours", drawing);
+	//cv::namedWindow("allContours", CV_WINDOW_AUTOSIZE);
+	//imshow("allContours", drawing);
 
 
 	std::sort(contours.begin(),contours.end(), less_vectors);
@@ -90,9 +90,9 @@ void Ear::contours(cv::Mat img, cv::Mat src) {
         convexHull( cv::Mat(vecContours[0]), hullSingle[0], false );
 
 	drawContours( src, hullSingle, 0, myColor, 2, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
-	cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-	imshow( "Contours", src );
-	imwrite("Contours.jpg", src);
+	//cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+	//imshow( "Contours", src );
+	//imwrite("Contours.jpg", src);
 }
 
 void Ear::improveContrast(cv::Mat img) {
@@ -108,8 +108,8 @@ void Ear::improveContrast(cv::Mat img) {
 			img.at<uchar>(y,x) = cv::saturate_cast<uchar>( alpha*( img.at<uchar>(y,x)-90 ) );
 		}
 	}
-	cv::namedWindow( "Contrast", CV_WINDOW_AUTOSIZE );
-        imshow( "Contrast", img );
+	//cv::namedWindow( "Contrast", CV_WINDOW_AUTOSIZE );
+        //imshow( "Contrast", img );
 }
 void Ear::NormalizeBrightnessAddConst(cv::Mat img) {
 	int value = 0;
@@ -153,11 +153,11 @@ void Ear::preprocess(cv::Mat img) {
 	NormalizeBrightnessAddConst(img);
 	GaussianBlur( img, img, cv::Size(25,25), 0, 0 );
 	double thresh = calcThresholdMedian(img);
-	cv::namedWindow( "Before binarization", CV_WINDOW_AUTOSIZE );
-	imshow( "Before binarization",img);
+	//cv::namedWindow( "Before binarization", CV_WINDOW_AUTOSIZE );
+	//imshow( "Before binarization",img);
 	threshold( img, img, thresh, 255,CV_THRESH_BINARY );
-	cv::namedWindow("After thresholding", CV_WINDOW_AUTOSIZE);
-	imshow("After thresholding", img);
+	//cv::namedWindow("After thresholding", CV_WINDOW_AUTOSIZE);
+	//imshow("After thresholding", img);
 	Canny( img,img, 100, 200, 3 );
 	contours(img,src);
 }
@@ -176,10 +176,10 @@ void Ear::preprocess2(cv::Mat img) {
 	erode(img,img,erodeElement);
 	medianBlur(img,img, 15);
 	dilate(img,img,dilateElement);
-	cv::namedWindow( "Erode dilate", CV_WINDOW_AUTOSIZE );
-        imshow( "Erode dilate", img );
+	//cv::namedWindow( "Erode dilate", CV_WINDOW_AUTOSIZE );
+        //imshow( "Erode dilate", img );
 	improveContrast(img);
-	imwrite("tylkodylatacjaerozja.jpg",img);
+	//imwrite("tylkodylatacjaerozja.jpg",img);
 	int kernel_size = 7;
 	int scale = 1;
 	int delta = 0;

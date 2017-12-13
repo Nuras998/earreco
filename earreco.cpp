@@ -16,10 +16,10 @@ int main( int argc, char** argv ) {
 		cap >> frame;
 		if( frame.empty() ) break; // end of video stream
  		Ear ear(frame);
-		cv::imshow("Ear rocognition", ear.getSelectedEar());
+		//cv::imshow("Ear rocognition", ear.getSelectedEar());
 		if(ear.isReady) {
-			cv::namedWindow("Extracted ear",  cv::WINDOW_NORMAL);
-			cv::imshow("Extracted ear", ear.getExtractedEar());
+			//cv::namedWindow("Extracted ear",  cv::WINDOW_NORMAL);
+			c//v::imshow("Extracted ear", ear.getExtractedEar());
 			imwrite("ear.jpg", ear.getExtractedEar());
 		}
 		else {
