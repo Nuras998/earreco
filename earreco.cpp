@@ -8,7 +8,7 @@ using namespace std;
 int main( int argc, char** argv ) {
 #ifdef _VIDEO_CAPTURE_
 	cv::VideoCapture cap;
-	if(!cap.open(1)) {
+	if(!cap.open(0)) {
 		return 0;
 	}
 	for(;;) {
@@ -21,6 +21,7 @@ int main( int argc, char** argv ) {
 			cv::namedWindow("Extracted ear",  cv::WINDOW_NORMAL);
 			cv::imshow("Extracted ear", ear.getExtractedEar());
 			imwrite("ear.jpg", ear.getExtractedEar());
+			imwrite("tutaj/ucho.jpg", ear.getOriginal());
 		}
 		else {
 			//cv::destroyWindow("Extracted ear");
@@ -43,8 +44,11 @@ int main( int argc, char** argv ) {
 			if(ears[i].isReady) {
 				std::ostringstream stm ;
 				stm << i ;
-				cv::imwrite("ears/ear" + stm.str() + ".jpg" , ears[i].getExtractedEar());
-			}
+				cv::imwrite("ears/krawedzie/ear" + stm.str() + ".jpg" , ears[i].getExtractedEar());
+				//cv::imwrite("ears/wyostrzenie/ear" + stm.str() + ".jpg" , ears[i].getSharpenedEar());
+				cv::imwrite("ears/rozmycie/ear" + stm.str() + ".jpg" , ears[i].getBlurredEar());
+				cv::imwrite("ears/kontrast/ear" + stm.str() + ".jpg", ears[i].getContrastEar());
+				cv::imwrite("ears/rozmiar/ear" + stm.str() + ".jpg" , ears[i].getResizedEar());}
 		}
 #endif
 	return 0;
