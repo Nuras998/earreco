@@ -63,8 +63,9 @@ cv::Rect Ear::findEar() {
 }
 
 void Ear::extractEar(cv::Rect cords) {
-	if(cords.x && cords.y) {
-	extractedEar = originalImg(cords);
+	//if(cords.x && cords.y) {
+	if(1) {
+	extractedEar = originalImg.clone();
 	//cv::cvtColor(extractedEar, extractedEar, CV_RGB2GRAY);
 	isReady = true;
 	}
@@ -80,7 +81,7 @@ void Ear::findReference() {
 
 void Ear::execute() {
 	isReady = false;
-	earCords = findEar();
+	//earCords = findEar();
 	extractEar(earCords);
 }
 	
