@@ -41,25 +41,31 @@ cv::Mat Ear::getExtractedEar() {
 }
 
 cv::Rect Ear::findEar() {
-	std::vector<cv::Rect> ears;
-	earSelected = originalImg.clone();
-	earClassifier.detectMultiScale(originalImg, ears);
-	cv::Rect cords(0,0,0,0);
-	if(ears.size() == 1) {
-		cords = ears[0];
-		cords.x -= cords.width * 0.17;
-		cords.y -= cords.height * 0.17;
-		cords.width += cords.width * 0.21;
-		cords.height += cords.height * 0.21;
-		cv::rectangle(earSelected, cords, CV_RGB(255,0,0),2);	
-	}
-	return cords;	
+        std::vector<cv::Rect> ears;
+        earSelected = originalImg.clone();
+        earClassifier.detectMultiScale(originalImg, ears);
+        cv::Rect cords(0,0,0,0);
+        if(ears.size() == 1) {
+                cords = ears[0];
+                cords.x -= cords.width * 0.25;
+                cords.y -= cords.height * 0.17;
+                cords.width += cords.width * 0.21;
+                cords.height += cords.height * 0.21;
+                if(cords.x < 0 || cords.y < 0 || cords.x + cords.width > earSelected.cols || cords.y + cords.height > earSelected.rows) {
+                cords.x = 0;
+                cords.y = 0;
+                cords.width = 0 ;
+                cords.height = 0;
+                }
+                cv::rectangle(earSelected, cords, CV_RGB(255,0,0),2);
+        }
+        return cords;
 }
 
 void Ear::extractEar(cv::Rect cords) {
 	if(cords.x && cords.y) {
 	extractedEar = originalImg(cords);
-	cv::cvtColor(extractedEar, extractedEar, CV_RGB2GRAY);
+	//cv::cvtColor(extractedEar, extractedEar, CV_RGB2GRAY);
 	isReady = true;
 	}
 }

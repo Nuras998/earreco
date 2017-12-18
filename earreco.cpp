@@ -7,8 +7,10 @@
 using namespace std;
 int main( int argc, char** argv ) {
 #ifdef _VIDEO_CAPTURE_
-	cv::VideoCapture cap;   
- 	if(!cap.open(0)) {
+	cv::VideoCapture cap;
+	int counter = 0;
+	cv::Mat savedEar;   
+ 	if(!cap.open(1)) {
 		return 0;
 	}
 	for(;;) {
@@ -17,15 +19,20 @@ int main( int argc, char** argv ) {
 		if( frame.empty() ) break; // end of video stream
  		Ear ear(frame);
 		cv::imshow("Ear rocognition", ear.getSelectedEar());
+		int key = cv::waitKey(10);
+		
 		if(ear.isReady) {
 			cv::namedWindow("Extracted ear",  cv::WINDOW_NORMAL);
 			cv::imshow("Extracted ear", ear.getExtractedEar());
-			imwrite("ear.jpg", ear.getExtractedEar());
+			savedEar = ear.getExtractedEar().clone();
 		}
-		else {
-			//cv::destroyWindow("Extracted ear");
+		if(key == 32 && !savedEar.empty()) {
+			ostringstream stm;
+			stm << counter;
+			imwrite("ears2/ear" + stm.str() + ".jpg", savedEar);
+			counter++;
 		}
-		if( cv::waitKey(10) == 27 ) break; // stop capturing by pressing ESC 
+		if( key  == 27 ) break; // stop capturing by pressing ESC 
 	}
 #else // _VIDEO_CAPTURE_
 
