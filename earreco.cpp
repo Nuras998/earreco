@@ -21,7 +21,7 @@ int main( int argc, char** argv ) {
 			cv::namedWindow("Extracted ear",  cv::WINDOW_NORMAL);
 			cv::imshow("Extracted ear", ear.getExtractedEar());
 			imwrite("ear.jpg", ear.getExtractedEar());
-			imwrite("tutaj/ucho.jpg", ear.getOriginal());
+			imwrite("baza/ucho.jpg", ear.getOriginal());
 		}
 		else {
 			//cv::destroyWindow("Extracted ear");
@@ -44,7 +44,7 @@ int main( int argc, char** argv ) {
 			if(ears[i].isReady) {
 				std::ostringstream stm ;
 				stm << i ;
-				cv::imwrite("ears/krawedzie/ear" + stm.str() + ".jpg" , ears[i].getExtractedEar());
+				cv::imwrite("ears/krawedzie/ear" + stm.str() + ".jpg" , ears[i].getPreprocessedEar());
 				//cv::imwrite("ears/wyostrzenie/ear" + stm.str() + ".jpg" , ears[i].getSharpenedEar());
 				cv::imwrite("ears/rozmycie/ear" + stm.str() + ".jpg" , ears[i].getBlurredEar());
 				cv::imwrite("ears/kontrast/ear" + stm.str() + ".jpg", ears[i].getContrastEar());
