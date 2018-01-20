@@ -8,7 +8,7 @@ using namespace std;
 int main( int argc, char** argv ) {
 #ifdef _VIDEO_CAPTURE_
 	cv::VideoCapture cap;
-	if(!cap.open(0)) {
+	if(!cap.open(1)) {
 		return 0;
 	}
 	for(;;) {
@@ -37,7 +37,7 @@ int main( int argc, char** argv ) {
 			ears.push_back(Ear(files[i].data()));
 		}
 		for(int i = 0; i < files.size(); i++) {
-			cout << files[i].data() << endl;
+			//cout << files[i].data() << endl;
 		}
 
 		for(int i = 0; i < ears.size(); i++) {
@@ -45,6 +45,7 @@ int main( int argc, char** argv ) {
 				std::ostringstream stm ;
 				stm << i ;
 				cv::imwrite("ears/krawedzie/ear" + stm.str() + ".jpg" , ears[i].getPreprocessedEar());
+				cv::imwrite("ears/krawedzieNasze/ear" + stm.str() + ".jpg" , ears[i].getEdges2Img());
 				//cv::imwrite("ears/wyostrzenie/ear" + stm.str() + ".jpg" , ears[i].getSharpenedEar());
 				cv::imwrite("ears/rozmycie/ear" + stm.str() + ".jpg" , ears[i].getBlurredEar());
 				cv::imwrite("ears/kontrast/ear" + stm.str() + ".jpg", ears[i].getContrastEar());
