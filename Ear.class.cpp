@@ -74,17 +74,20 @@ cv::Rect Ear::findEar() {
 		cords.y -= cords.height * 0.12;
 		cords.width += cords.width * 0.18;
 		cords.height += cords.height * 0.1;
+
+
+
 		if(cords.x < 0 || cords.y < 0 || cords.x + cords.width > earSelected.cols || cords.y + cords.height > earSelected.rows) {
-		cords.x = 0;
-		cords.y = 0;
-		cords.width = 0 ;
-		cords.height = 0;
+			cords.x = 0;
+			cords.y = 0;
+			cords.width = 0 ;
+			cords.height = 0;
 		}
-		cv::rectangle(earSelected, cords, CV_RGB(255,0,0),2);	
+		cv::rectangle(earSelected, cords, CV_RGB(255,0,0),2);
 	}
 	return cords;	
 }
-bool Ear::less_vectors(const std::vector<cv::Point_<int> >& a,const std::vector<cv::Point_<int> >& b) {
+bool Ear::shorter(const std::vector<cv::Point_<int> >& a,const std::vector<cv::Point_<int> >& b) {
 	double first = cv::contourArea(a, false );
 	double second =  cv::contourArea(b, false);
 	//return (first < second) && a.size() < b.size();
@@ -99,7 +102,7 @@ std::vector<std::vector<cv::Point_<int> > > Ear::contoursFind(cv::Mat img, int m
 	std::vector<cv::Vec4i> hierarchy;
 	findContours( img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
 
-	std::sort(contours.begin(),contours.end(), less_vectors);
+	std::sort(contours.begin(),contours.end(), shorter);
 	int numCont = contours.size();
 //	std::cout << contours.size() << std::endl;
 	std::vector<std::vector<cv::Point> > contoursBig;
@@ -108,7 +111,7 @@ std::vector<std::vector<cv::Point_<int> > > Ear::contoursFind(cv::Mat img, int m
 			contoursBig.push_back(contours[i]);
 		}
 	}
-	//std::sort(contoursBig.begin(),contoursBig.end(), less_vectors);
+	//std::sort(contoursBig.begin(),contoursBig.end(), shorter);
 /*	//CHOOSING ONLY FIVE LONGEST CONTOURS - bez sensu
 	std::vector<std::vector<cv::Point> > contoursBigTopFive;
 	if(contoursBig.size() == 5) {
@@ -151,7 +154,7 @@ std::vector<std::vector<cv::Point_<int> > > Ear::contoursFind(cv::Mat img, int m
 
 //SORTING CONTOURS AND CHOOSING ONLY THE LONGEST ONE
 /*
-	std::sort(contours.begin(),contours.end(), less_vectors);
+	std::sort(contours.begin(),contours.end(), shorter);
 	std::vector<cv::Point> singleContour = contours[contours.size()-1];
 	std::vector<std::vector<cv::Point> > vecContours;
 	vecContours.push_back(singleContour);
@@ -200,6 +203,7 @@ std::vector<std::vector<cv::Point_<int> > > Ear::getNotOverlappingContours(std::
 					for(int m=0;m<contoursNotOverlap.size();m++) {
 						if(contoursNotOverlap[m]==v2[d]) {
 							contoursNotOverlap.erase(contoursNotOverlap.begin()+m);
+							m--;
 						}
 					}
 				} else {
@@ -210,6 +214,7 @@ std::vector<std::vector<cv::Point_<int> > > Ear::getNotOverlappingContours(std::
 					for(int n=0;n<contoursNotOverlap.size();n++) {
 						if(contoursNotOverlap[n]==v1[c]) {
 							contoursNotOverlap.erase(contoursNotOverlap.begin()+n);
+							n--;
 						}
 					}
 				}
@@ -232,7 +237,7 @@ bool Ear::checkContours(std::vector<std::vector<cv::Point_<int> > > contours) {
 	std::vector<std::vector<cv::Point> >hull( contours.size() );
 	for( int i = 0; i < contours.size(); i++ )
 		{  convexHull( cv::Mat(contours[i]), hull[i], false ); }
-	std::sort(hull.begin(),hull.end(), less_vectors);
+	std::sort(hull.begin(),hull.end(), shorter);
 	std::vector<cv::Point> biggestC=hull[hull.size()-1];
 	int cInsideCount=0;
 
@@ -255,11 +260,11 @@ bool Ear::checkContours(std::vector<std::vector<cv::Point_<int> > > contours) {
 	for(int i=0;i<(hull.size()-1);i++) {
 		drawContours( drawing, hull, i, gray, 1, 8, cv::noArray(), 0, cv::Point() );
 	}
-	cv::Scalar white = cv::Scalar( 255,255,255 );
-	drawContours( drawing, hull, hull.size()-1, white, 1, 8, cv::noArray(), 0, cv::Point() );
-	drawing.copyTo(preprocessedEar);
+	//cv::Scalar white = cv::Scalar( 255,255,255 );
+	//drawContours( drawing, hull, hull.size()-1, white, 1, 8, cv::noArray(), 0, cv::Point() );
+	//drawing.copyTo(preprocessedEar);
 
-	std::cout << cInsideCount << std::endl;
+	//std::cout << cInsideCount << std::endl;
 	if(cInsideCount>=3)
 		return true;
 	else
@@ -389,15 +394,14 @@ void Ear::findEdges(cv::Mat img) {
 	//cv::Mat wynik(img.rows,img.cols, CV_8UC3, cv::Scalar::all(0));
 	//result=img.clone();
 	//cv::Mat window;//(cv::Size(3,3),CV_8UC1);
-/*	cv::Mat imgPadding;
-	copyMakeBorder(img,imgPadding,7,7,7,7,cv::BORDER_CONSTANT,0);
-	cv::Mat result=cv::Mat::zeros(imgPadding.size(),CV_8UC1);
+
+	cv::Mat result=cv::Mat::zeros(img.size(),CV_8UC1);
 	cv::Rect patch(7,7,3,3);
 	cv::Rect patchNeighbourhood(0,0,17,17);
-	for(int y=0;y<(imgPadding.rows-16);y++) {
-		for(int x=0;x<(imgPadding.cols-16);x++) {	
-			cv::Mat window=imgPadding(patch);
-			cv::Mat neighbourhood=imgPadding(patchNeighbourhood);
+	for(int y=0;y<(img.rows-16);y++) {
+		for(int x=0;x<(img.cols-16);x++) {
+			cv::Mat window=img(patch);
+			cv::Mat neighbourhood=img(patchNeighbourhood);
 
 			double mean = calcMean(window);
 			double standardDeviation = calcStandardDeviation(neighbourhood);
@@ -423,7 +427,8 @@ void Ear::findEdges(cv::Mat img) {
 		patchNeighbourhood.y++;
 		//patch+=cv::Point(0,1);
 	}
-*/
+
+/*
 	cv::Mat result=cv::Mat::zeros(img.size(),CV_8UC1);
 	cv::Rect patch(0,0,3,3);
 	for(int y=0;y<(img.rows-2);y++) {
@@ -451,7 +456,7 @@ void Ear::findEdges(cv::Mat img) {
 		patch.y++;
 		//patch+=cv::Point(0,1);
 	}
-	//std::cout << "Krawedzie rozmiar" << result.size() << std::endl;
+*/	//std::cout << "Krawedzie rozmiar" << result.size() << std::endl;
 	result.copyTo(edges2Img);
 }
 void Ear::preprocess() {
@@ -502,11 +507,13 @@ void Ear::preprocess() {
 		} else if(i==1) { //Choraś
 			preprocessedEar=cv::Mat::zeros(fixedSize.size(),CV_32F);
 			GaussianBlur(bw,blurredEar, cv::Size(0, 0), 3);
-			findEdges(blurredEar);
+			findEdges(bw);
+			medianBlur(edges2Img,blurredEar,7);
+			blurredEar.copyTo(edges2Img);
 			cv::Mat edgesFinal=cv::Mat::zeros(fixedSize.size(),CV_32F);
-			Canny(edges2Img,edgesFinal,10,30,7);
-			edgesFinal.copyTo(edges2Img);
-			contours2method = contoursFind(edges2Img,350);
+			//Canny(edges2Img,edgesFinal,10,30,7);
+			//edgesFinal.copyTo(edges2Img);
+			//contours2method = contoursFind(edges2Img,350);
 		} else if(i==2) { //Laplacian
 			preprocessedEar=cv::Mat::zeros(fixedSize.size(),CV_32F);
 			equalizeHist(bw,contrastEar);
@@ -527,10 +534,9 @@ void Ear::preprocess() {
 	//images.push_back(preprocessedEar);
 	}
 	//contours = getNotOverlappingContours(contoursCanny,contours2method);
-	//if(contours.size()>0)
-	//	bool contoursOk = checkContours(contours);
-	
-	drawingContours(contours2method);
+	if(contoursCanny.size()>0)
+		preprocessingOk = checkContours(contoursCanny);
+	drawingContours(contoursCanny);
 /*
 //DODAWANIE OBRAZÓW
 	cv::Mat s=cv::Mat::zeros(fixedSize.size(),CV_32F);

@@ -31,7 +31,7 @@ private:
 	double calcMean(cv::Mat img);
 	double calcStandardDeviation(cv::Mat img);
 	void findEdges(cv::Mat img);
-	static bool less_vectors(const std::vector<cv::Point_<int> >& a, const std::vector<cv::Point_<int> >& b);
+	static bool shorter(const std::vector<cv::Point_<int> >& a, const std::vector<cv::Point_<int> >& b);
 	std::vector<std::vector<cv::Point_<int> > > contoursFind(cv::Mat img, int minLength);
 	std::vector<std::vector<cv::Point_<int> > > getNotOverlappingContours(std::vector<std::vector<cv::Point_<int> > > v1, std::vector<std::vector<cv::Point_<int> > > v2);
 	bool checkContours(std::vector<std::vector<cv::Point_<int> > > contours);
@@ -45,6 +45,7 @@ private:
         cv::Mat originalImg;
         cv::Mat earSelected;
         cv::Mat extractedEar;
+	cv::Mat extractedEarPadding;
 	cv::Mat preprocessedEar;
 	cv::Mat blurredEar;
 	cv::Mat resizedEar;
@@ -57,5 +58,6 @@ private:
 	cv::Mat contoursCannyImg;
 	cv::Mat contoursLaplacian;
 	cv::Rect earCords;
+	bool preprocessingOk;
 };
 
