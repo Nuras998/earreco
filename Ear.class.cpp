@@ -242,17 +242,24 @@ bool Ear::checkContours(std::vector<std::vector<cv::Point_<int> > > contours) {
 	int cInsideCount=0;
 
 	cv::Mat cImg(hull[hull.size()-1]);
+	//std::vector<std::vector<cv::Point> > testD;
+	std::vector<cv::Point> cVect = hull[hull.size()-1];
+	//testD.push_back(test);
+	//cv::Mat testObraz=cv::Mat::zeros( preprocessedEar.size(), CV_32F );;
+	//drawContours( testObraz, testD, 0, cv::Scalar(255,255,255), 1, 8, cv::noArray(), 0, cv::Point() );
+	//imshow("obrys", testObraz);
 	cv::Mat cImgType;
+	//cv::waitKey();
 	cImg.convertTo(cImgType,CV_32F);
 
 	for(int i=0; i<hull.size(); i++) {
-		int pointsInsideCount=0;
+		float pointsInsideCount=0;
 		for(int j=0; j<hull[i].size(); j++) {
-			int check=pointPolygonTest(cImgType,hull[i][j],false);
-			if(check==1)
+			//int check=pointPolygonTest(cImgType,hull[i][j],false);
+			if(pointPolygonTest(cImgType,hull[i][j],false)==1)
 				pointsInsideCount++;
 		}
-		if(pointsInsideCount>=(0.7*hull[1].size()))
+		if(pointsInsideCount>= (float) (0.7*hull[i].size()))
 			cInsideCount++;
 	}
 	cv::Mat drawing = cv::Mat::zeros( preprocessedEar.size(), CV_32F );;
@@ -260,11 +267,11 @@ bool Ear::checkContours(std::vector<std::vector<cv::Point_<int> > > contours) {
 	for(int i=0;i<(hull.size()-1);i++) {
 		drawContours( drawing, hull, i, gray, 1, 8, cv::noArray(), 0, cv::Point() );
 	}
-	//cv::Scalar white = cv::Scalar( 255,255,255 );
-	//drawContours( drawing, hull, hull.size()-1, white, 1, 8, cv::noArray(), 0, cv::Point() );
-	//drawing.copyTo(preprocessedEar);
+	cv::Scalar white = cv::Scalar( 255,255,255 );
+	drawContours( drawing, hull, hull.size()-1, white, 1, 8, cv::noArray(), 0, cv::Point() );
+	drawing.copyTo(preprocessedEar);
 
-	//std::cout << cInsideCount << std::endl;
+	std::cout << cInsideCount << std::endl;
 	if(cInsideCount>=3)
 		return true;
 	else
@@ -536,7 +543,7 @@ void Ear::preprocess() {
 	//contours = getNotOverlappingContours(contoursCanny,contours2method);
 	if(contoursCanny.size()>0)
 		preprocessingOk = checkContours(contoursCanny);
-	drawingContours(contoursCanny);
+	//drawingContours(contoursCanny);
 /*
 //DODAWANIE OBRAZÓW
 	cv::Mat s=cv::Mat::zeros(fixedSize.size(),CV_32F);
