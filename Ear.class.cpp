@@ -45,14 +45,8 @@ cv::Mat Ear::getPreprocessedEar() {
 cv::Mat Ear::getBlurredEar() {
 	return blurredEar;
 }
-cv::Mat Ear::getResizedEar() {
-	return resizedEar;
-}
 cv::Mat Ear::getContrastEar() {
 	return contrastEar;
-}
-cv::Mat Ear::getSharpenedEar() {
-	return sharpenedEar;
 }
 cv::Mat Ear::getEdges2Img() {
 	return edges2Img;
@@ -85,88 +79,28 @@ cv::Rect Ear::findEar() {
 	return cords;	
 }
 bool Ear::shorter(const std::vector<cv::Point_<int> >& a,const std::vector<cv::Point_<int> >& b) {
-	double first = cv::contourArea(a, false );
-	double second =  cv::contourArea(b, false);
-	//return (first < second) && a.size() < b.size();
 	return arcLength(a, false) < arcLength(b,false);
 }
 std::vector<std::vector<cv::Point_<int> > > Ear::contoursFind(cv::Mat img, int minLength) {
 	cv::Mat type;
 	img.convertTo(type,CV_8UC1);
 	type.copyTo(img);
-	//std::cout << preprocessedEar.depth() << std::endl;
 	std::vector<std::vector<cv::Point> > contours;
 	std::vector<cv::Vec4i> hierarchy;
 	findContours( img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
 
 	std::sort(contours.begin(),contours.end(), shorter);
 	int numCont = contours.size();
-//	std::cout << contours.size() << std::endl;
 	std::vector<std::vector<cv::Point> > contoursBig;
 	for(int i=0;i<contours.size();i++) {
-		if(arcLength(contours[i],false) > minLength) { //canny 150 nasze 250
+		if(arcLength(contours[i],false) > minLength) { //canny 150, choras 250
 			contoursBig.push_back(contours[i]);
 		}
 	}
-	//std::sort(contoursBig.begin(),contoursBig.end(), shorter);
-/*	//CHOOSING ONLY FIVE LONGEST CONTOURS - bez sensu
-	std::vector<std::vector<cv::Point> > contoursBigTopFive;
-	if(contoursBig.size() == 5) {
-		for(int j=0;j<5;j++) {
-			contoursBigTopFive.push_back(contoursBig[j]);
-		}
-	} else if(contoursBig.size() > 5) {
-		for(int j=4;j>=0;j--) {
-			contoursBigTopFive.push_back(contoursBig[j]);
-		}
-	}
-*/
-
-/*
-	for(int i=0;i<contoursBig.size();i++) {
-		if(!isContourConvex(contoursBig[i])) {
-			std::cout << "WKLESLY" << std::endl;
-		}
-	}
-*/
-/*
-	std::vector<std::vector<cv::Point> >hull( contoursBig.size() );
-	for( int i = 0; i < contoursBig.size(); i++ )
-	{  convexHull( cv::Mat(contoursBig[i]), hull[i], false ); }
-*/
-/*	
-	//zapis parametrow konturow do pliku
-	td::ofstream myfile;
-	myfile.open ("example.txt");
-	for(int i=0;i<contoursBig.size();i++) {
-		myfile << contourArea(contoursBig[i],false);
-		myfile << " \n";
-	}
-	myfile.close();
-*/
-	//contours.erase(contours.begin() , contours.end()-25);
-//	std::cout << contoursBig.size() << std::endl;
-//	std::cout << "Nastepny: " << std::endl;
 	return contoursBig;
-
-//SORTING CONTOURS AND CHOOSING ONLY THE LONGEST ONE
-/*
-	std::sort(contours.begin(),contours.end(), shorter);
-	std::vector<cv::Point> singleContour = contours[contours.size()-1];
-	std::vector<std::vector<cv::Point> > vecContours;
-	vecContours.push_back(singleContour);
-	cv::Mat picSingleContour = cv::Mat::zeros(preprocessedEar.size(), CV_8UC3);
-	cv::Vec3b myColor(255,0,0);
-	std::vector<std::vector<cv::Point> >hullSingle(vecContours.size());
-        convexHull( cv::Mat(vecContours[0]), hullSingle[0], false );
-	cv::cvtColor(preprocessedEar,preprocessedEar,CV_GRAY2BGR);
-	drawContours( preprocessedEar, hullSingle, 0, myColor, 2, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
-	drawContours( extractedEar, hullSingle, 0, myColor, 2, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
-*/
 }
 
 std::vector<std::vector<cv::Point_<int> > > Ear::getNotOverlappingContours(std::vector<std::vector<cv::Point_<int> > > v1, std::vector<std::vector<cv::Point_<int> > > v2) {
-	//USUWANIE NAKŁADAJĄCYCH SIĘ NA SIEBIE KONTURÓW
 	std::vector<std::vector<cv::Point> > contoursNotOverlap;
 	std::vector<bool> blocked1(v1.size());
 	blocked1.assign(blocked1.size(),false);
@@ -179,19 +113,18 @@ std::vector<std::vector<cv::Point_<int> > > Ear::getNotOverlappingContours(std::
 	for(int c=0; c<v1.size(); c++) {
 		int count=0;
 		for(int d=0; d<v2.size(); d++) {
-			//std::vector<cv::Point> sharedPoints;
 			for(int i=0; i<v1[c].size(); i++) {
 				for(int j=0; j<v2[d].size(); j++) {
 					for(int k=-2; k<=2;k++) {
 						for(int l=-2; l<=2; l++) {
-							if( (v1[c][i].x+l)==v2[d][j].x && (v1[c][i].y+k)==v2[d][j].y) { //!
+							if( (v1[c][i].x+l)==v2[d][j].x && (v1[c][i].y+k)==v2[d][j].y) {
 								count++;
 							}
 						}
 					}
 				}
 			}
-			if(count >= 50) { //(double) (0.05*v1[c].size()) && count >= (double) (0.05*v2[d].size())) {
+			if(count >= 50) {
 				if(arcLength(v1[c],false) > arcLength(v2[d],false)) {
 					if(!alreadyThere1[c])
 						contoursNotOverlap.push_back(v1[c]);
@@ -227,7 +160,6 @@ std::vector<std::vector<cv::Point_<int> > > Ear::getNotOverlappingContours(std::
 			}
 		}
 	}
-	//std::unique(contoursNotOverlap.begin(),contoursNotOverlap.end());
 	return contoursNotOverlap;
 }
 bool Ear::checkContours(std::vector<std::vector<cv::Point_<int> > > contours) {
@@ -239,26 +171,19 @@ bool Ear::checkContours(std::vector<std::vector<cv::Point_<int> > > contours) {
 	int cInsideCount=0;
 
 	cv::Mat cImg(hull[hull.size()-1]);
-	//std::vector<std::vector<cv::Point> > testD;
-	std::vector<cv::Point> cVect = hull[hull.size()-1];
-	//testD.push_back(test);
-	//cv::Mat testObraz=cv::Mat::zeros( preprocessedEar.size(), CV_32F );;
-	//drawContours( testObraz, testD, 0, cv::Scalar(255,255,255), 1, 8, cv::noArray(), 0, cv::Point() );
-	//imshow("obrys", testObraz);
 	cv::Mat cImgType;
-	//cv::waitKey();
 	cImg.convertTo(cImgType,CV_32F);
 
 	for(int i=0; i<hull.size(); i++) {
 		float pointsInsideCount=0;
 		for(int j=0; j<hull[i].size(); j++) {
-			//int check=pointPolygonTest(cImgType,hull[i][j],false);
 			if(pointPolygonTest(cImgType,hull[i][j],false)==1)
 				pointsInsideCount++;
 		}
-		if(pointsInsideCount>= (float) (0.7*hull[i].size()))
+		if(pointsInsideCount>= (float) (0.5*hull[i].size()))
 			cInsideCount++;
 	}
+/*
 	cv::Mat drawing = cv::Mat::zeros( preprocessedEar.size(), CV_32F );;
 	cv::Scalar gray = cv::Scalar(125,125,125);
 	for(int i=0;i<(hull.size()-1);i++) {
@@ -269,6 +194,7 @@ bool Ear::checkContours(std::vector<std::vector<cv::Point_<int> > > contours) {
 	drawing.copyTo(preprocessedEar);
 
 	std::cout << cInsideCount << std::endl;
+*/
 	if(cInsideCount>=3)
 		return true;
 	else
@@ -281,12 +207,10 @@ void Ear::drawingContours(std::vector<std::vector<cv::Point_<int> > > contours) 
 	for( int i = 0; i< contours.size(); i++ ) {
 		cv::Scalar color = cv::Scalar( 255,255,255 );
 		drawContours( drawing, contours, i, color, 1, 8, cv::noArray(), 0, cv::Point() );
-		//drawContours( contoursClosed, hull, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
 	}
 
 	drawing.copyTo(preprocessedEar);
 }
-
 bool R1(int R, int G, int B) {
 	bool e1 = (R>95) && (G>40) && (B>20) && ((cv::max(R,cv::max(G,B)) - cv::min(R, cv::min(G,B)))>15) && (abs(R-G)>15) && (R>G) && (R>B);
 	bool e2 = (R>220) && (G>210) && (B>170) && (abs(R-G)<=15) && (R>B) && (G>B);
@@ -357,23 +281,6 @@ cv::Mat Ear::GetSkin(cv::Mat const &src) {
 	}
 	return dst;
 }
-int Ear::calcMedian(cv::Mat img) {
-        std::vector<int> pixels;
-        int median = 0;
-        for(int i=0; i<img.rows; i++) {
-                for(int j=0; j<img.cols; j++) {
-                        pixels.push_back( (int) img.at<uchar>(i, j));
-                }
-        }
-        std::sort(pixels.begin(), pixels.end(), std::greater<int>() ); //sortowanie od najmniejszego do największego
-        //for(int i=0; i<pixels.size(); i++)
-                //std::cout << pixels.at(i) << std::endl;
-        if( pixels.size() % 2 != 0 ) //jeżeli liczba pikseli nieparzysta
-                median = pixels.at( (pixels.size()+1)/2);
-        else if(pixels.size() % 2 == 0) //l pikseli parzysta
-                median =( ( (int) floor( pixels.at( (pixels.size()+1)/2) ) + (int) ceil( pixels.at( (pixels.size()+1)/2) ) ) / 2);
-        return median;
-}
 double Ear::calcMean(cv::Mat img) {
 	int mean = 0;
 	for(int i=0;i<img.rows;i++) {
@@ -395,10 +302,6 @@ double Ear::calcStandardDeviation(cv::Mat img) {
 }
 
 void Ear::findEdges(cv::Mat img) {
-	//cv::Mat wynik(img.rows,img.cols, CV_8UC3, cv::Scalar::all(0));
-	//result=img.clone();
-	//cv::Mat window;//(cv::Size(3,3),CV_8UC1);
-
 	cv::Mat result=cv::Mat::zeros(img.size(),CV_8UC1);
 	cv::Rect patch(7,7,3,3);
 	cv::Rect patchNeighbourhood(0,0,17,17);
@@ -415,56 +318,23 @@ void Ear::findEdges(cv::Mat img) {
 			cv::minMaxLoc(window, &min, &max);
 			double S = max - min;
 			if(S>=T) {
-				//std::cout << "weszlo wiersz " << y << " , kolumna "<< x << " z wiersza " << img.rows << ", kolumny " << img.cols << std::endl;
 				result.at<uchar>(y+8,x+8) = 255;
 			} else {
-				//std::cout << "nie wiersz " << y << ", kolumna " <<  x << " z wiersza " << img.rows << ", kolumny " << img.cols << std::endl;
 				result.at<uchar>(y+8,x+8) = 0;
 			}
 			patch.x++;
 			patchNeighbourhood.x++;
-			//patch+=cv::Point(1,0);
 		}
 		patch.x=0;
 		patch.y++;
 		patchNeighbourhood.x=0;
 		patchNeighbourhood.y++;
-		//patch+=cv::Point(0,1);
 	}
 
-/*
-	cv::Mat result=cv::Mat::zeros(img.size(),CV_8UC1);
-	cv::Rect patch(0,0,3,3);
-	for(int y=0;y<(img.rows-2);y++) {
-		for(int x=0;x<(img.cols-2);x++) {	
-			cv::Mat window=img(patch);
-
-			double mean = calcMean(window);
-			double standardDeviation = calcStandardDeviation(window);
-			double k = 0.2;
-			double T = mean - k*standardDeviation;
-			double min, max;
-			cv::minMaxLoc(window, &min, &max);
-			double S = max - min;
-			if(S>=T) {
-				//std::cout << "weszlo wiersz " << y << " , kolumna "<< x << " z wiersza " << img.rows << ", kolumny " << img.cols << std::endl;
-				result.at<uchar>(y+1,x+1) = 255;
-			} else {
-				//std::cout << "nie wiersz " << y << ", kolumna " <<  x << " z wiersza " << img.rows << ", kolumny " << img.cols << std::endl;
-				result.at<uchar>(y+1,x+1) = 0;
-			}
-			patch.x++;
-			//patch+=cv::Point(1,0);
-		}
-		patch.x=0;
-		patch.y++;
-		//patch+=cv::Point(0,1);
-	}
-*/	//std::cout << "Krawedzie rozmiar" << result.size() << std::endl;
 	result.copyTo(edges2Img);
 }
 void Ear::preprocess() {
-	//cv::cvtColor(extractedEar,extractedEar,CV_BGR2GRAY);
+	preprocessingOk = false;
 	preprocessedEar = extractedEar.clone();
 	cv::Mat fixedSize;
 	resize(preprocessedEar,fixedSize, cv::Size(180,250), 0,0, cv::INTER_CUBIC );
@@ -482,28 +352,16 @@ void Ear::preprocess() {
 	std::vector<std::vector<cv::Point> > contours2method;
 	std::vector<std::vector<cv::Point> > contoursLaplacian;
 	std::vector<std::vector<cv::Point> > contours;
-	for(int i = 0; i<3;i++) {
+	for(int i = 0; i<1;i++) {
 		if(i==0) { //Canny
 			preprocessedEar=cv::Mat::zeros(fixedSize.size(),CV_32F);
-			//cv::Mat denoised;
-			//cv::Mat equalHist;
 			//cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
 			//clahe->setClipLimit(4);
 			//clahe->apply(bw,contrastEar);
 			equalizeHist(bw,contrastEar);
 			GaussianBlur(contrastEar,blurredEar, cv::Size(0, 0), 5);
-			//int sizeBilateral =9;
-			//bilateralFilter ( contrastEar,blurredEar, sizeBilateral, sizeBilateral*2, sizeBilateral/2 );
-			//blurredEar.convertTo(contrastEar, -1, 1.5, 0);
-			//GaussianBlur(contrastEar,blurredEar, cv::Size(sizeBilateral,sizeBilateral), 3,3, cv::BORDER_DEFAULT );
-			//cv::Mat scalledDown=cv::Mat::zeros(fixedSize.size(),CV_16S);
-			//resize(blurredEar,scalledDown, cv::Size(), 1.0/(1.41* (double) i),1.0/(1.41* (double) i), cv::INTER_CUBIC );
-			//resize(smallerContrast,scalledDown, cv::Size(), 0.5,0.5, cv::INTER_CUBIC );
-
 			cv::Mat edges=cv::Mat::zeros(fixedSize.size(),CV_32F);
-			//cv::Mat edgesScale=cv::Mat::zeros(fixedSize.size(),CV_16S);
 			Canny(blurredEar,edges,10,30,7);
-			//resize(edges,edgesScale, fixedSize.size(), 0,0, cv::INTER_CUBIC );
 
 			edges.copyTo(edgesCannyImg);
 			contoursCanny = contoursFind(edgesCannyImg,150);
@@ -540,7 +398,10 @@ void Ear::preprocess() {
 	//contours = getNotOverlappingContours(contoursCanny,contours2method);
 	if(contoursCanny.size()>0)
 		preprocessingOk = checkContours(contoursCanny);
-	//drawingContours(contoursCanny);
+	else
+		preprocessingOk = false;
+	drawingContours(contoursCanny);
+
 /*
 //DODAWANIE OBRAZÓW
 	cv::Mat s=cv::Mat::zeros(fixedSize.size(),CV_32F);
@@ -549,11 +410,8 @@ void Ear::preprocess() {
 		add(s,images[i],dst,cv::noArray(),-1);
 		dst.copyTo(s);
 	}
-	cv::Mat dilated;
-	//dilate(s,dilated,element);
 	s.copyTo(preprocessedEar);
 */
-	//contours(250);
 }
 void Ear::extractEar(cv::Rect cords) {
 	if(cords.x && cords.y) {

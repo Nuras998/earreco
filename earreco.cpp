@@ -94,12 +94,17 @@ int main( int argc, char** argv ) {
 
 		std::cout << "ID: " << ID << std::endl;
 */
-		std::cout << "dzik" << std::endl;
-		Ear ear("ear75.jpg");
+		//std::cout << "dzik" << std::endl;
+		Ear ear("ear0.jpg");
 		
 		if(ear.preprocessingOk) {
+			std::cout << "preprocessing poprawny" << std::endl;
 			cv::imshow("conturs", ear.getPreprocessedEar());
-			
+			while(cv::waitKey(10) != 27) {};
+		} else {
+			std::cout << "preprocessing niepoprawny" << std::endl;
+			cv::imshow("conturs", ear.getPreprocessedEar());
+                        while(cv::waitKey(10) != 27) {};
 		}
 #endif
 	return 0;

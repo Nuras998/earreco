@@ -11,9 +11,7 @@ public:
         cv::Mat getExtractedEar();
 	cv::Mat getPreprocessedEar();
 	cv::Mat getBlurredEar();
-	cv::Mat getResizedEar();
 	cv::Mat getContrastEar();
-	cv::Mat getSharpenedEar();
 	cv::Mat getEdges2Img();
 	cv::Mat getEdgesCannyImg();
 	cv::Mat getEdgesLaplacianImg();
@@ -28,7 +26,6 @@ private:
         void calcHaarFeature(cv::Mat img);
         void extractEar(cv::Rect cords);
 	void preprocess();
-	int calcMedian(cv::Mat img);
 	double calcMean(cv::Mat img);
 	double calcStandardDeviation(cv::Mat img);
 	void findEdges(cv::Mat img);
@@ -49,9 +46,7 @@ private:
 	cv::Mat extractedEarPadding;
 	cv::Mat preprocessedEar;
 	cv::Mat blurredEar;
-	cv::Mat resizedEar;
 	cv::Mat contrastEar;
-	cv::Mat sharpenedEar;
 	cv::Mat edges2Img;
 	cv::Mat edgesCannyImg;
 	cv::Mat edgesLaplacian;
