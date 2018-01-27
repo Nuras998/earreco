@@ -29,8 +29,8 @@ int main( int argc, char** argv ) {
 		if(ear.isReady) {
 			cv::namedWindow("Extracted ear",  cv::WINDOW_NORMAL);
 			cv::imshow("Extracted ear", ear.getExtractedEar());
-			savedEar = ear.getExtractedEar().clone();
-			original = ear.getOriginal().clone();
+			imwrite("ear.jpg", ear.getExtractedEar());
+			imwrite("baza/ucho.jpg", ear.getOriginal());
 		}
 		if(key == 32 && !savedEar.empty()) {
 			ostringstream stm;
@@ -50,15 +50,22 @@ int main( int argc, char** argv ) {
 		for(int i = 0; i < files.size(); i++) {
 			ears.push_back(Ear(files[i].data()));
 		}
+		for(int i = 0; i < files.size(); i++) {
+			//cout << files[i].data() << endl;
+		}
 
 		for(int i = 0; i < ears.size(); i++) {
 			if(ears[i].isReady) {
 				std::ostringstream stm ;
 				stm << i ;
-				cv::imwrite("ears/ear" + stm.str() + ".jpg" , ears[i].getExtractedEar());
-			}
+				cv::imwrite("ears/krawedzie/ear" + stm.str() + ".jpg" , ears[i].getPreprocessedEar());
+				cv::imwrite("ears/krawedzieNasze/ear" + stm.str() + ".jpg" , ears[i].getEdges2Img());
+				//cv::imwrite("ears/wyostrzenie/ear" + stm.str() + ".jpg" , ears[i].getSharpenedEar());
+				cv::imwrite("ears/rozmycie/ear" + stm.str() + ".jpg" , ears[i].getBlurredEar());
+				cv::imwrite("ears/kontrast/ear" + stm.str() + ".jpg", ears[i].getContrastEar());
+				cv::imwrite("ears/rozmiar/ear" + stm.str() + ".jpg" , ears[i].getResizedEar());}
 		}
-		*/
+		
 		cv::Mat conturs1 = cv::imread(argv[1]);
 		cv::Mat conturs2 = cv::imread(argv[2]);
 		cv::Mat conturs3 = cv::imread(argv[3]);
@@ -86,6 +93,14 @@ int main( int argc, char** argv ) {
 		int ID = comparator.compare(descEar5.getFeature());
 
 		std::cout << "ID: " << ID << std::endl;
+*/
+		std::cout << "dzik" << std::endl;
+		Ear ear("ear75.jpg");
+		
+		if(ear.preprocessingOk) {
+			cv::imshow("conturs", ear.getPreprocessedEar());
+			
+		}
 #endif
 	return 0;
 }
