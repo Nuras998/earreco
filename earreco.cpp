@@ -86,7 +86,6 @@ int main( int argc, char** argv ) {
 		int ID = comparator.compare(descEar5.getFeature());
 
 		std::cout << "ID: " << ID << std::endl;
-//		while(cv::waitKey(10) != 27) { };
 #endif
 	return 0;
 }
