@@ -65,7 +65,7 @@ int main( int argc, char** argv ) {
 				cv::imwrite("ears/kontrast/ear" + stm.str() + ".jpg", ears[i].getContrastEar());
 				cv::imwrite("ears/rozmiar/ear" + stm.str() + ".jpg" , ears[i].getResizedEar());}
 		}
-		
+		*/
 		cv::Mat conturs1 = cv::imread(argv[1]);
 		cv::Mat conturs2 = cv::imread(argv[2]);
 		cv::Mat conturs3 = cv::imread(argv[3]);
@@ -85,16 +85,15 @@ int main( int argc, char** argv ) {
 		descEar5.calcFeature(4, 15);
 
 		Comparator comparator;
-		comparator.addRecord(descEar1.getFeature(), 1);
-		comparator.addRecord(descEar2.getFeature(), 2);
-		comparator.addRecord(descEar3.getFeature(), 3);
-		comparator.addRecord(descEar4.getFeature(), 4);
+//		comparator.addRecord(descEar1.getFeature(), 1);
+//		comparator.addRecord(descEar2.getFeature(), 2);
 
-		int ID = comparator.compare(descEar5.getFeature());
+		comparator.loadRecords();
+		comparator.saveRecords();
+		//int ID = comparator.compare(descEar5.getFeature());
 
-		std::cout << "ID: " << ID << std::endl;
-*/
-		//std::cout << "dzik" << std::endl;
+		//std::cout << "ID: " << ID << std::endl;
+		/*
 		Ear ear("ear0.jpg");
 		
 		if(ear.preprocessingOk) {
@@ -105,7 +104,7 @@ int main( int argc, char** argv ) {
 			std::cout << "preprocessing niepoprawny" << std::endl;
 			cv::imshow("conturs", ear.getPreprocessedEar());
                         while(cv::waitKey(10) != 27) {};
-		}
+		*/
 #endif
 	return 0;
 }

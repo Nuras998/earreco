@@ -6,14 +6,10 @@ void Comparator::addRecord(std::vector< std::vector< Feature > > feature, int id
 	Record record;
  
 	for(int i = 0; i < feature.size(); i++) {
-		std::vector<Feature> vec;
+		std::vector<int> vec;
 		for(int j = 0; j < feature[i].size(); j++) {
-			Feature f;
-			f.x = feature[i][j].x;
-			f.y = feature[i][j].y;
-			f.angle = feature[i][j].angle;
-			f.radius = feature[i][j].radius;
-			vec.push_back(f);
+			int angle = feature[i][j].angle;
+			vec.push_back(angle);
 		}
 	record.feat.push_back(vec);
 	vec.clear();
@@ -46,7 +42,7 @@ int Comparator::compare(std::vector < std::vector< Feature > > query) {
 	
 }
 
-float Comparator::checkRecord(std::vector< std::vector< Feature > > query, std::vector< std::vector< Feature > > record) {
+float Comparator::checkRecord(std::vector< std::vector< Feature > > query, std::vector< std::vector< int > > record) {
 	float match = 0.0f;
 	for(int i = 0; i < record.size(); i++) {
 		for(int j = 0; j < record[i].size(); j++) {
@@ -59,13 +55,13 @@ float Comparator::checkRecord(std::vector< std::vector< Feature > > query, std::
 	return match;
 }
 
-float Comparator::checkSimilarity(std::vector<Feature> query, std::vector<Feature> record, int treshold) {
+float Comparator::checkSimilarity(std::vector<Feature> query, std::vector<int> record, int treshold) {
 	float similarity = 0.0f;
 	if(query.size() >= record.size()) { 
 		for(int i = 0; i < query.size(); i++) {
 			int counter = 0;
 			for(int j = 0; j < record.size(); j++) {
-				if(std::abs(query[i].angle - record[j].angle) < treshold) {
+				if(std::abs(query[i].angle - record[j]) < treshold) {
 					similarity += (float)1/query.size();
 				}
 			}
@@ -79,12 +75,64 @@ float Comparator::checkSimilarity(std::vector<Feature> query, std::vector<Featur
 		for(int i = 0; i < record.size(); i++) {
 			int counter = 0;
 			for(int j = 0; j < query.size(); j++) {
-				if(std::abs(record[i].angle - query[j].angle) < treshold) {
+				if(std::abs(record[i] - query[j].angle) < treshold) {
 					similarity += (float)1/record.size();
 				}
 			}
 		}
 	}
 	return similarity;
+}
+
+void Comparator::saveRecords() {
+	std::fstream base;
+	base.open("base.txt", std::ios::in | std::ios::out | std::ios::trunc);
+	
+	for(int i = 0; i < records.size(); i++) {
+		for(int j = 0; j < records[i].feat.size(); j++) {
+			for(int k = 0; k < records[i].feat[j].size(); k++) { 
+					base << records[i].feat[j][k];
+					base << ",";
+			}
+			
+			base << ":";
+		}
+		base << records[i].id << std::endl;
+	}
+	base.close();
+	
+
+}
+void Comparator::loadRecords() {
+	std::fstream base;
+	base.open("base.txt", std::ios::in | std::ios::out);
+	std::string rec;
+	records.clear();
+	while(getline(base, rec)) {
+		Record record;
+
+		std::cout << rec << std::endl;
+		
+		for(int i = 0; i < rec.lengh(); i++) {
+			std::string f;
+			std::vector<int> vec;
+			if(rec[i] == ',') {
+				vec.push_back(std::stoi(f));
+				f.clear();
+			}
+			else if(rec[i] == ':') {
+				record.feat.push_back(vec);
+				vec.clear();
+				f.clear();
+			} else if(rec[i] == '.') {				
+				record.id = std::stoi(f);
+				f.clear(); 
+
+			} else {
+				f += rec[i];
+			}
+		records.push_back(record);				
+		}	
+	}
 }
 
