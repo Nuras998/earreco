@@ -115,7 +115,7 @@ int main( int argc, char** argv ) {
 			std::cout << "preprocessing niepoprawny" << std::endl;
 			cv::imshow("conturs", ear.getPreprocessedEar());
                         while(cv::waitKey(10) != 27) {};
-		
+		}
 #endif
 	return 0;
 }

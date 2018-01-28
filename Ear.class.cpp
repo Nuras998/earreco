@@ -51,8 +51,11 @@ cv::Mat Ear::getContrastEar() {
 cv::Mat Ear::getEdges2Img() {
 	return edges2Img;
 }
-cv::Mat Ear::getEdgesCannyImg() {
-	return edgesCannyImg;
+cv::Mat Ear::getEdgesGCannyImg() {
+	return edgesGCannyImg;
+}
+cv::Mat Ear::getEdgesBGCannyImg() {
+        return edgesBGCannyImg;
 }
 cv::Mat Ear::getEdgesLaplacianImg() {
 	return edgesLaplacian;
@@ -348,12 +351,13 @@ void Ear::preprocess() {
               cv::Point(erosion_size, erosion_size) );
 
 	std::vector<cv::Mat> images;
-	std::vector<std::vector<cv::Point> > contoursCanny;
+	std::vector<std::vector<cv::Point> > contoursGCanny;
+	std::vector<std::vector<cv::Point> > contoursBGCanny;
 	std::vector<std::vector<cv::Point> > contours2method;
 	std::vector<std::vector<cv::Point> > contoursLaplacian;
 	std::vector<std::vector<cv::Point> > contours;
 	for(int i = 0; i<1;i++) {
-		if(i==0) { //Canny
+		if(i==0) { //Gauss Canny
 			preprocessedEar=cv::Mat::zeros(fixedSize.size(),CV_32F);
 			//cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
 			//clahe->setClipLimit(4);
@@ -363,10 +367,26 @@ void Ear::preprocess() {
 			cv::Mat edges=cv::Mat::zeros(fixedSize.size(),CV_32F);
 			Canny(blurredEar,edges,10,30,7);
 
-			edges.copyTo(edgesCannyImg);
-			contoursCanny = contoursFind(edgesCannyImg,150);
+			edges.copyTo(edgesGCannyImg);
+			contoursGCanny = contoursFind(edgesGCannyImg,150);
 
-		} else if(i==1) { //Choraś
+		} else if(i==1) { //Bilateral Gauss Canny
+			preprocessedEar=cv::Mat::zeros(fixedSize.size(),CV_32F);
+			//cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+			//clahe->setClipLimit(4);
+			//clahe->apply(bw,contrastEar);
+			equalizeHist(bw,contrastEar);
+			int size = 15;
+			cv::Mat partBlurred;
+			bilateralFilter ( contrastEar,partBlurred, size, size*2, size/2 );
+			GaussianBlur(partBlurred,blurredEar, cv::Size(0, 0), 5);
+			cv::Mat edges=cv::Mat::zeros(fixedSize.size(),CV_32F);
+			Canny(blurredEar,edges,10,30,7);
+
+			edges.copyTo(edgesBGCannyImg);
+			contoursBGCanny = contoursFind(edgesBGCannyImg,150);
+
+		} else if(i==2) { //Choras
 			preprocessedEar=cv::Mat::zeros(fixedSize.size(),CV_32F);
 			GaussianBlur(bw,blurredEar, cv::Size(0, 0), 3);
 			findEdges(bw);
@@ -376,7 +396,7 @@ void Ear::preprocess() {
 			//Canny(edges2Img,edgesFinal,10,30,7);
 			//edgesFinal.copyTo(edges2Img);
 			//contours2method = contoursFind(edges2Img,350);
-		} else if(i==2) { //Laplacian
+		} else if(i==3) { //Laplacian
 			preprocessedEar=cv::Mat::zeros(fixedSize.size(),CV_32F);
 			equalizeHist(bw,contrastEar);
 			GaussianBlur(contrastEar,blurredEar, cv::Size(0, 0), 3);
@@ -396,11 +416,15 @@ void Ear::preprocess() {
 	//images.push_back(preprocessedEar);
 	}
 	//contours = getNotOverlappingContours(contoursCanny,contours2method);
-	if(contoursCanny.size()>0)
-		preprocessingOk = checkContours(contoursCanny);
+	for(int i=0;i<contoursGCanny.size();i++)
+                contours.push_back(contoursGCanny[i]);
+        for(int i=0;i<contoursBGCanny.size();i++)
+                contours.push_back(contoursBGCanny[i]);
+	if(contours.size()>0)
+		preprocessingOk = checkContours(contours);
 	else
 		preprocessingOk = false;
-	drawingContours(contoursCanny);
+	drawingContours(contours);
 
 /*
 //DODAWANIE OBRAZÓW

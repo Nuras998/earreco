@@ -13,7 +13,8 @@ public:
 	cv::Mat getBlurredEar();
 	cv::Mat getContrastEar();
 	cv::Mat getEdges2Img();
-	cv::Mat getEdgesCannyImg();
+	cv::Mat getEdgesGCannyImg();
+	cv::Mat getEdgesBGCannyImg();
 	cv::Mat getEdgesLaplacianImg();
 	cv::Mat cont;
         void load(const char* fileName);
@@ -48,10 +49,12 @@ private:
 	cv::Mat blurredEar;
 	cv::Mat contrastEar;
 	cv::Mat edges2Img;
-	cv::Mat edgesCannyImg;
+	cv::Mat edgesGCannyImg;
+	cv::Mat edgesBGCannyImg;
 	cv::Mat edgesLaplacian;
 	cv::Mat conturs2Img;
-	cv::Mat contoursCannyImg;
+	cv::Mat contoursGCannyImg;
+	cv::Mat contoursBGCannyImg;
 	cv::Mat contoursLaplacian;
 	cv::Rect earCords;
 };
