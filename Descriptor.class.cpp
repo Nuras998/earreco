@@ -14,7 +14,9 @@ void Descriptor::calcFeature(int numbOfCircles, int tresh) {
 	cv::Point center(conturs.cols/2, conturs.rows/2); 
 
 	cv::Mat copy = conturs.clone();
-	cvtColor(conturs, conturs, cv::COLOR_RGB2GRAY);
+	conturs.convertTo(conturs, 0);
+	//copy.convertTo(copy, 18);
+	//cvtColor(copy, copy, cv::COLOR_GREY2BGR);
 	std::vector< std::vector< cv::Point > > points;
 
 	for (int i = 0; i < numbOfCircles; i++)	{
@@ -30,7 +32,7 @@ void Descriptor::calcFeature(int numbOfCircles, int tresh) {
 	
 	for(int i = 0; i < points.size(); i++) {
 		for(int j = 0 ; j < points[i].size();  j++) {
-			cv::line(copy, cv::Point(center.x, center.y), cv::Point(points[i][j].x, points[i][j].y), cv::Scalar(0, 255, 0));
+			cv::line(copy, cv::Point(center.x, center.y), cv::Point(points[i][j].x, points[i][j].y), cv::Scalar(255));
 		}
 	}
 	
@@ -48,10 +50,9 @@ void Descriptor::calcFeature(int numbOfCircles, int tresh) {
 
 std::vector< cv::Point > Descriptor::searchPoints(cv::Mat img, cv::Mat circle, int tresh) {	
 	std::vector< cv::Point > points;
-
 	for(int i = 0 ; i < img.rows; i++) {
 		for(int j = 0; j < img.cols; j++) {
-			if(circle.at<uchar>(i, j) > 130 && img.at<uchar>(i, j) > 130) {
+			if(circle.at<uchar>(i, j) > 100 && img.at<uchar>(i, j) > 100) {
 
 				cv::Point point(j, i);
 				bool pointOut = false;

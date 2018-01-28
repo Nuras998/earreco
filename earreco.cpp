@@ -7,37 +7,58 @@
 #include "tools.h"
 #include <vector>
 #include <string>
+#include <sstream>
 
 using namespace std;
 int main( int argc, char** argv ) {
 #ifdef _VIDEO_CAPTURE_
 	cv::VideoCapture cap;
-	int counter = 0;
-	cv::Mat savedEar;
-	cv::Mat original;
+	Comparator comparator;
+	comparator.loadRecords();
  	if(!cap.open(1)) {
 		return 0;
 	}
 	for(;;) {
+		int key = cv::waitKey(20);
 		cv::Mat frame;
 		cap >> frame;
+		
 		if( frame.empty() ) break; // end of video stream
  		Ear ear(frame);
-		cv::imshow("Ear rocognition", ear.getSelectedEar());
-		int key = cv::waitKey(10);
-		
+		cv::Mat image = ear.getSelectedEar().clone();
+
+		cv::imshow("earreco", image);
 		if(ear.isReady) {
-			cv::namedWindow("Extracted ear",  cv::WINDOW_NORMAL);
-			cv::imshow("Extracted ear", ear.getExtractedEar());
-			imwrite("ear.jpg", ear.getExtractedEar());
-			imwrite("baza/ucho.jpg", ear.getOriginal());
-		}
-		if(key == 32 && !savedEar.empty()) {
-			ostringstream stm;
-			stm << counter;
-			imwrite("ears2/ear" + stm.str() + ".jpg", savedEar);
-			imwrite("ears3/ear" + stm.str() + ".jpg", original);
-			counter++;
+			cv::Mat prep = ear.getPreprocessedEar();
+			cv::imshow("conturs", prep);
+			if(key == 32) {
+				Descriptor desc(prep);
+				desc.calcFeature(4, 15);
+				int key = 0;
+				while(1) {
+					int key = cv::waitKey(10);
+					if(key == 115) {
+						cv::putText(image, "Przypisz id", cv::Point(20, image.rows - 20), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255,0,0), 6);
+						cv::imshow("earreco", image);
+						int id = cv::waitKey(0);
+						id -= 48;
+						comparator.addRecord(desc.getFeature(), id);
+						break;
+					}
+					else if(key == 99) {
+						int match_id = comparator.compare(desc.getFeature());
+						ostringstream ss;
+						ss << match_id;
+						string str = ss.str();
+						cv::putText(image, "Znaleziono id: " + str, cv::Point(20, image.rows - 20), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255,0,0), 6);
+						cv::imshow("earreco", image);
+					}
+						
+					if(key == 27) break;
+				}
+					
+			}
+			
 		}
 		if( key  == 27 ) break; // stop capturing by pressing ESC 
 	}
@@ -53,19 +74,9 @@ int main( int argc, char** argv ) {
 		for(int i = 0; i < files.size(); i++) {
 			//cout << files[i].data() << endl;
 		}
-
-		for(int i = 0; i < ears.size(); i++) {
-			if(ears[i].isReady) {
-				std::ostringstream stm ;
-				stm << i ;
-				cv::imwrite("ears/krawedzie/ear" + stm.str() + ".jpg" , ears[i].getPreprocessedEar());
-				cv::imwrite("ears/krawedzieNasze/ear" + stm.str() + ".jpg" , ears[i].getEdges2Img());
-				//cv::imwrite("ears/wyostrzenie/ear" + stm.str() + ".jpg" , ears[i].getSharpenedEar());
-				cv::imwrite("ears/rozmycie/ear" + stm.str() + ".jpg" , ears[i].getBlurredEar());
-				cv::imwrite("ears/kontrast/ear" + stm.str() + ".jpg", ears[i].getContrastEar());
-				cv::imwrite("ears/rozmiar/ear" + stm.str() + ".jpg" , ears[i].getResizedEar());}
-		}
 		*/
+		
+		/*
 		cv::Mat conturs1 = cv::imread(argv[1]);
 		cv::Mat conturs2 = cv::imread(argv[2]);
 		cv::Mat conturs3 = cv::imread(argv[3]);
@@ -88,12 +99,12 @@ int main( int argc, char** argv ) {
 //		comparator.addRecord(descEar1.getFeature(), 1);
 //		comparator.addRecord(descEar2.getFeature(), 2);
 
-		comparator.loadRecords();
-		comparator.saveRecords();
+		//comparator.loadRecords();
+		//comparator.saveRecords();
 		//int ID = comparator.compare(descEar5.getFeature());
 
 		//std::cout << "ID: " << ID << std::endl;
-		/*
+		*/
 		Ear ear("ear0.jpg");
 		
 		if(ear.preprocessingOk) {
@@ -104,7 +115,7 @@ int main( int argc, char** argv ) {
 			std::cout << "preprocessing niepoprawny" << std::endl;
 			cv::imshow("conturs", ear.getPreprocessedEar());
                         while(cv::waitKey(10) != 27) {};
-		*/
+		
 #endif
 	return 0;
 }

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstdlib>
 #include "Structs.h"
 struct Record {
 std::vector < std::vector< int > > feat;

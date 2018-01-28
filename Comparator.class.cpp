@@ -4,7 +4,6 @@ Comparator::Comparator() {}
 
 void Comparator::addRecord(std::vector< std::vector< Feature > > feature, int id) {
 	Record record;
- 
 	for(int i = 0; i < feature.size(); i++) {
 		std::vector<int> vec;
 		for(int j = 0; j < feature[i].size(); j++) {
@@ -22,7 +21,8 @@ void Comparator::addRecord(std::vector< std::vector< Feature > > feature, int id
 		record.id = id;
 	}
 				
-	records.push_back(record);	
+	records.push_back(record);
+	saveRecords();	
 }
 
 int Comparator::compare(std::vector < std::vector< Feature > > query) {
@@ -50,7 +50,6 @@ float Comparator::checkRecord(std::vector< std::vector< Feature > > query, std::
 		}
 		
 	}
-	//std::cout << "Match: " << match << " Record size: " << record.size() << " Query size: " << query.size() << std::endl;
 	match /= record.size();
 	return match;
 }
@@ -86,8 +85,7 @@ float Comparator::checkSimilarity(std::vector<Feature> query, std::vector<int> r
 
 void Comparator::saveRecords() {
 	std::fstream base;
-	base.open("base.txt", std::ios::in | std::ios::out | std::ios::trunc);
-	
+	base.open("base.txt", std::ios::in | std::ios::out | std::ios::trunc);	
 	for(int i = 0; i < records.size(); i++) {
 		for(int j = 0; j < records[i].feat.size(); j++) {
 			for(int k = 0; k < records[i].feat[j].size(); k++) { 
@@ -97,7 +95,7 @@ void Comparator::saveRecords() {
 			
 			base << ":";
 		}
-		base << records[i].id << std::endl;
+		base << records[i].id << "." << std::endl;
 	}
 	base.close();
 	
@@ -110,14 +108,11 @@ void Comparator::loadRecords() {
 	records.clear();
 	while(getline(base, rec)) {
 		Record record;
-
-		std::cout << rec << std::endl;
-		
-		for(int i = 0; i < rec.lengh(); i++) {
-			std::string f;
-			std::vector<int> vec;
+		std::string f;
+		std::vector<int> vec;		
+		for(int i = 0; i < rec.length(); i++) {
 			if(rec[i] == ',') {
-				vec.push_back(std::stoi(f));
+				vec.push_back(atoi(f.c_str()));
 				f.clear();
 			}
 			else if(rec[i] == ':') {
@@ -125,14 +120,13 @@ void Comparator::loadRecords() {
 				vec.clear();
 				f.clear();
 			} else if(rec[i] == '.') {				
-				record.id = std::stoi(f);
-				f.clear(); 
-
+				record.id = atoi(f.c_str());
 			} else {
-				f += rec[i];
+				f += rec.at(i);
 			}
+		}
 		records.push_back(record);				
-		}	
 	}
+	base.close();
 }
 
