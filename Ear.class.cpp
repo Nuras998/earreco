@@ -13,7 +13,11 @@ Ear::Ear() {
 Ear::Ear(const char* fileName) {
 	originalImg = cv::imread(fileName);
 	if(earClassifier.empty()) {
+		auto start = std::chrono::system_clock::now();	
 		earClassifier.load("classifiers/haarcascade_mcs_leftear.xml");
+		auto end = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end-start;
+		std::cout << "Czas ładowania klasyfikatora: " << elapsed_seconds.count()<< "s" << std::endl;
 	}
 	execute();		
 }
@@ -60,7 +64,11 @@ cv::Mat Ear::getEdgesLaplacianImg() {
 cv::Rect Ear::findEar() {
 	std::vector<cv::Rect> ears;
 	earSelected = originalImg.clone();
+	auto start = std::chrono::system_clock::now();
 	earClassifier.detectMultiScale(originalImg, ears);
+	auto end = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout << "Czas wyszukiwania ucha: " << elapsed_seconds.count()<< "s" << std::endl;
 	cv::Rect cords(0,0,0,0);
 	if(ears.size() == 1) {
 		cords = ears[0];
@@ -416,7 +424,11 @@ void Ear::preprocess() {
 void Ear::extractEar(cv::Rect cords) {
 	if(cords.x && cords.y) {
 	extractedEar = originalImg(cords);
+	auto start = std::chrono::system_clock::now();
 	preprocess();
+	auto end = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout << "Czas wstępnego przetwarzania: " << elapsed_seconds.count()<< "s" << std::endl;
 	isReady = true;
 	}
 }

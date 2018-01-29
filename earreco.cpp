@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <ctime>
+#include <chrono>
 
 using namespace std;
 int main( int argc, char** argv ) {
@@ -106,16 +108,13 @@ int main( int argc, char** argv ) {
 		//std::cout << "ID: " << ID << std::endl;
 		*/
 		Ear ear("ear0.jpg");
-		
-		if(ear.preprocessingOk) {
-			std::cout << "preprocessing poprawny" << std::endl;
-			cv::imshow("conturs", ear.getPreprocessedEar());
-			while(cv::waitKey(10) != 27) {};
-		} else {
-			std::cout << "preprocessing niepoprawny" << std::endl;
-			cv::imshow("conturs", ear.getPreprocessedEar());
-                        while(cv::waitKey(10) != 27) {};
-		
+			
+		Descriptor desc(ear.getPreprocessedEar());
+		auto start = std::chrono::system_clock::now();
+		desc.calcFeature(4, 12);	
+		auto end = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end-start;
+		std::cout << "Czas ekstrakcji cech: " << elapsed_seconds.count() << "s" << std::endl;	
 #endif
 	return 0;
 }
